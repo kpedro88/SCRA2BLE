@@ -1,5 +1,37 @@
 import sys
 import collections
+
+# helper class
+
+class systLine:
+    def __init__( self, name, type, bins, vals, correl=False ):
+        self._name = name;
+        self._type = type;
+        self._bins = bins;
+        self._vals = vals;
+        self._correl = correl;
+        
+    def writeLine( self, binLabels, rates ):
+        line = "";
+        line += self._name + " " + self._type + " ";
+        bin=0; # keeps track of correlations
+        for i in range(len(binLabels)):
+            if binLabels[i] in self._bins:
+                if self._type == 'lnU' and rates[i] < 0.000001: line += str(val*1000) + " ";
+                else:
+                    if len(self._vals[bin])==1: # symmetric case
+                        if self._vals[bin][0]>-99.: line += str(self._vals[bin][0]) + " ";
+                        else: line += "- ";
+                    elif len(self._vals[bin])==2: # asymmetric case
+                        if self._vals[bin][0]>-99. and self._vals[bin][1]>-99.: line += str(self._vals[bin][0]) + "/" + str(self._vals[bin][1]) + " ";
+                        else: line += "- ";
+                    else:
+                        line += "- ";
+                if self._correl: bin+=1
+            else: line += "- ";
+        line += "\n";
+        return line
+
 class singleBin:
 
     def __init__( self , name, tag, binLabels, index ):
@@ -10,6 +42,7 @@ class singleBin:
         self._binLabels = binLabels;
         self._rates = [];
         self._allLines = [];
+        self._allSysts = [];
 
         # print "bin tag = ", tag, index
 
@@ -73,88 +106,24 @@ class singleBin:
         self._allLines.append("------------ \n");
 
     def addSystematic(self,sysname,systype,bins,val):
-        #print sysname
-        # print "length rates = ",len(self._rates)
-        #print bins,val
-        line = "";
-        line += sysname + " " + systype + " ";
-        #bin=0;
-        for i in range(len(self._binLabels)):
-            #print len(self._binLabels)
-            if self._binLabels[i] in bins:
-                #print self._binLabels[i]
-                if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1000) + " ";
-                else: 
-                    if(val>-99.):
-                        line += str(val) + " ";
-                    else: 
-                        line += " - ";
-            else: line += "- ";
-        line += "\n";
-        self._allLines.append(line);
+        systmp = systLine(sysname,systype,bins,[[val]])
+        self._allSysts.append(systmp)
 
     def addCorrelSystematic(self,sysname,systype,bins,val1, val2):
-        #print sysname
-        # print "length rates = ",len(self._rates)
-        line = "";
-        line += sysname + " " + systype + " ";
-        bin=0;
-        for i in range(len(self._binLabels)):
-            #print len(self._binLabels)
-            if self._binLabels[i] in bins:
-                #print self._binLabels[i]
-                if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1000) + " ";
-                else:
-                    if val1>-99. and val2>-99.:
-                        if(bin==0):
-                            line += str(val1) + " ";
-                        if(bin==1):
-                            line += str(val2) + " ";
-                    else:
-                        line += " - ";
-                    bin+=1
-            else: line += "- ";
-        line += "\n";
-        self._allLines.append(line);
+        systmp = systLine(sysname,systype,bins,[[val1],[val2]],True)
+        self._allSysts.append(systmp)
 
     def addCorrelSystematicAsym(self,sysname,systype,bins,val1up, val1dn, val2up,val2dn):
-        #print sysname
-        # print "length rates = ",len(self._rates)
-        line = "";
-        line += sysname + " " + systype + " ";
-        bin=0;
-        for i in range(len(self._binLabels)):
-            #print len(self._binLabels)
-            if self._binLabels[i] in bins:
-                #print self._binLabels[i]
-                if val1up>-99. and val2up>-99.:
-                    if(bin==0):line += str(val1dn) + "/" + str(val1up);
-                    if(bin==1):line += str(val2dn) + "/" +str(val2up);
-                else:
-                     line += " - ";
-                bin+=1
-            else: line += " - ";
-        line += "\n";
-        self._allLines.append(line);
+        systmp = systLine(sysname,systype,bins,[[val1dn,val1up],[val2dn,val2up]],True)
+        self._allSysts.append(systmp)
 
     def addAsymSystematic(self,sysname,systype,bins,valup, valdown ):
-        line = "";
-        line += sysname + " " + systype + " ";
-        bin=0;
-        for i in range(len(self._binLabels)): 
-            if self._binLabels[i] in bins:
-                #print self._binLabels[i]
-                if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1000) + " ";
-                else: 
-                    if(valdown>-99. and valup>-99.):
-                        line += str(valdown) + "/" +str(valup)+" ";
-                    else: line += " - ";
-            else: line += " - ";
-        line += "\n";
-        self._allLines.append(line);
+        systmp = systLine(sysname,systype,bins,[[valdown,valup]])
+        self._allSysts.append(systmp)
 
     def writeCard( self, odir ):
         
         ofile = open(odir+'/card_'+self._name+'.txt','w');
         for line in self._allLines: ofile.write(line);
+        for syst in self._allSysts: ofile.write(syst.writeLine(self._binLabels,self._rates));
         ofile.close();

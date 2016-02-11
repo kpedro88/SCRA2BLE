@@ -771,7 +771,7 @@ if __name__ == '__main__':
             #      signalRegion.addAsymSystematic('PDFUnc','lnN', ['sig'], (signalRegion_sigListPDFUp[i]/signalRegion_sigList[i]),signalRegion_sigListPDFDown[i]/signalRegion_sigList[i],'', i)
             # else:
             #      signalRegion.addAsymSystematic('PDFUnc','lnN', ['sig'], (signalRegion_sigListPDFUp[i]/signalRegion_sigList[i]),signalRegion_sigList[i]/signalRegion_sigListPDFUp[i],'', i)
-              if signalRegion_sigListScaleDown[i] > 0.00001:
+            if signalRegion_sigListScaleDown[i] > 0.00001:
                  signalRegion.addAsymSystematic('ScaleUnc','lnN', ['sig'], (signalRegion_sigListScaleUp[i]/signalRegion_sigList[i]),signalRegion_sigListScaleDown[i]/signalRegion_sigList[i],'', i)
             else: 
                  signalRegion.addAsymSystematic('ScaleUnc','lnN', ['sig'], (signalRegion_sigListScaleUp[i]/signalRegion_sigList[i]),signalRegion_sigList[i]/signalRegion_sigListScaleUp[i],'', i)    
@@ -863,7 +863,7 @@ if __name__ == '__main__':
 
             if options.llpOnly: signalRegion.addAsymSystematic("LLSysMuIso",'lnN',['WTopSL'],(LLSysMuIsoUp[i]), (LLSysMuIsoDown[i]),'', i)
             else: signalRegion.addCorrelSystematicAsym("LLSysMuIso",'lnN',['WTopSL','WTopHad'],LLSysMuIsoUp[i], LLSysMuIsoDown[i],HadTauMuonIsoUncUp[i], HadTauMuonIsoUncDn[i],'', i)
-             if options.llpOnly: signalRegion.addAsymSystematic("LLSysMuReco",'lnN',['WTopSL'],(LLSysMuRecoUp[i]), (LLSysMuRecoDown[i]),'', i)
+            if options.llpOnly: signalRegion.addAsymSystematic("LLSysMuReco",'lnN',['WTopSL'],(LLSysMuRecoUp[i]), (LLSysMuRecoDown[i]),'', i)
             else: 
                 signalRegion.addCorrelSystematicAsym("LLSysMuIso",'lnN',['WTopSL','WTopHad'],LLSysMuRecoUp[i], LLSysMuRecoDown[i],HadTauMuonCorrUncUp[i], HadTauMuonCorrUncDn[i],'', i)
                 signalRegion.addCorrelSystematicAsym("LLStatMuIso",'lnN',['WTopSL','WTopHad'],(LLStatMuIsoUp[i]), (LLStatMuIsoDown[i]),HadTauMuonIsoRecoStatUncUp[i], HadTauMuonIsoRecoStatUncDn[i],'', i)
