@@ -16,6 +16,7 @@ parser.add_option("--mu", dest="mu", default = 1.,help="mass of LSP", metavar="m
 parser.add_option("--lumi", dest="lumi", default = 10.,help="mass of LSP", metavar="lumi")
 parser.add_option('--fastsim', action='store_true', dest='fastsim', default=False, help='no X11 windows')
 parser.add_option('--realData', action='store_true', dest='realData', default=False, help='no X11 windows')
+parser.add_option('--quiet', action='store_true', dest='quiet', default=False, help='reduce printouts')
 
 parser.add_option('--qcdOnly', action='store_true', dest='qcdOnly', default=False, help='no X11 windows')
 parser.add_option('--zvvOnly', action='store_true', dest='zvvOnly', default=False, help='no X11 windows')
@@ -670,9 +671,9 @@ if __name__ == '__main__':
         ll.Fill(i+.5, signalRegion_LLList[i])
         tau.Fill(i+.5, signalRegion_tauList[i])    
 
-
-        print "bin {0:2}: {1:6.2f} {2:6.2f} ||| {3:6.2f} {4:6.2f} {5:6.2f} {6:6.2f}".format(i,signalRegion_sigList[i]*signalmu,srobs-signalRegion_sigList[i]*signalmu,NSRForSignalRegion_QCDList[i],ZvvYieldsInSignalRegion[i],signalRegion_LLList[i],signalRegion_tauList[i]),
-        print " ---", tagsForSignalRegion[i]
+        if not options.quiet:
+            print "bin {0:2}: {1:6.2f} {2:6.2f} ||| {3:6.2f} {4:6.2f} {5:6.2f} {6:6.2f}".format(i,signalRegion_sigList[i]*signalmu,srobs-signalRegion_sigList[i]*signalmu,NSRForSignalRegion_QCDList[i],ZvvYieldsInSignalRegion[i],signalRegion_LLList[i],signalRegion_tauList[i]),
+            print " ---", tagsForSignalRegion[i]
 
         tmpList = [];
         if options.fastsim and ('T1t' in model or 'T5qqqqVV' in model) :
@@ -1022,6 +1023,9 @@ if __name__ == '__main__':
     ######################################################################
     ######################################################################    
 
+    signalRegion.systRange( odir, 0 );
+    signalRegion.systRange( odir, 1 );
+    signalRegion.systRange( odir, 2 );
     signalRegion.writeCards( odir );
     if options.allBkgs or options.llpOnly or  (options.tauOnly and  options.llpOnly) or options.tauOnly: SLcontrolRegion.writeCards( odir );
     # if options.allBkgs or options.tauOnly: HadcontrolRegion.writeCards( odir );

@@ -2,6 +2,10 @@ import sys
 import re
 import collections
 from singleBin import *
+from math import log,exp,sqrt
+#import pprint
+from heapq import nlargest
+from collections import OrderedDict
 
 class searchRegion:
 
@@ -106,3 +110,55 @@ class searchRegion:
 
     def GetNbins(self):
         return self._nBins;
+        
+    def systRange(self, odir, method):
+        syst_minmax = OrderedDict()
+        norm_Q = -1
+        
+        # find top ten bins for method 1
+        all_Q = []
+        for ibin in self._singleBins:
+            # calculate bin sensitivity Q
+            bkg_tot = sum(ibin._rates[1:])
+            sig_tot = ibin._rates[0]
+            Q = 2*(sqrt(sig_tot + bkg_tot) - sqrt(bkg_tot))
+            all_Q.append(Q)
+        topten = nlargest(10,all_Q)
+        minten = min(topten)
+        
+        for ibin in self._singleBins:
+            # calculate bin sensitivity Q
+            bkg_tot = sum(ibin._rates[1:])
+            sig_tot = ibin._rates[0]
+            Q = 2*(sqrt(sig_tot + bkg_tot) - sqrt(bkg_tot))
+            if method==0: Q = 1.0
+            elif method==1:
+                if Q < minten: continue
+                else: Q = 1.0
+            if norm_Q == -1 or norm_Q < Q: norm_Q = Q
+            for isyst in ibin._allSysts:
+                # only check signal systematics, assume not correlated with any bkgs
+                if 'sig' not in isyst._bins: continue
+                # get range of this syst
+                irange = 0
+                if len(isyst._vals[0])==1: irange = abs(1-isyst._vals[0][0])
+                elif len(isyst._vals[0])==2: irange = max(abs(1-isyst._vals[0][0]),abs(1-isyst._vals[0][1]))
+                # weight range based on Q (normalize later)
+                irange *= Q
+                # check min and max
+                tmp_minmax = syst_minmax.get(isyst._name,[1e10, 0])
+                syst_minmax[isyst._name] = [min( tmp_minmax[0], irange ), max( tmp_minmax[1], irange )]
+
+        # normalize ranges and make %
+        maxSystNameLength = 0
+        for k, v in syst_minmax.iteritems():
+            syst_minmax[k] = [v[0]/norm_Q*100, v[1]/norm_Q*100]
+            if len(k) > maxSystNameLength: maxSystNameLength = len(k)
+
+        # output results
+        ofile = open(odir+'/syst_'+self._regionName+'_method'+str(method)+'.txt','w');
+        myformat = "{:<"+str(maxSystNameLength+2)+"} {:10.6f} {:10.6f}"
+        for k, v in syst_minmax.iteritems():
+            ofile.write(myformat.format(k,v[0],v[1])+"\n")
+        #pprint.pprint(syst_minmax,ofile)
+        ofile.close()
