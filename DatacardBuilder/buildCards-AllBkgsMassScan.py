@@ -9,20 +9,21 @@ from cardUtilities import *
 
 from optparse import OptionParser
 parser = OptionParser()
-parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
 parser.add_option("--signal", dest="signal", default = 'SMSqqqq1000',help="mass of LSP", metavar="signal")
 parser.add_option("--tag", dest="tag", default = 'SinglePhoton1',help="mass of LSP", metavar="tag")
-parser.add_option("--mu", dest="mu", default = 1.,help="mass of LSP", metavar="mu")
-parser.add_option("--lumi", dest="lumi", default = 10.,help="mass of LSP", metavar="lumi")
-parser.add_option('--fastsim', action='store_true', dest='fastsim', default=False, help='no X11 windows')
-parser.add_option('--realData', action='store_true', dest='realData', default=False, help='no X11 windows')
+parser.add_option("--mu", dest="mu", default = 1.,help="signal strength", metavar="mu")
+parser.add_option("--lumi", dest="lumi", default = 10.,help="integrated luminosity", metavar="lumi")
+parser.add_option("--eos", dest="eos", default = "",help="EOS directory prefix", metavar="eos")
+parser.add_option("--dir", dest="dir", default = "",help="directory to store card directories", metavar="dir")
+parser.add_option('--fastsim', action='store_true', dest='fastsim', default=False, help='use fastsim signal')
+parser.add_option('--realData', action='store_true', dest='realData', default=False, help='use real data')
 parser.add_option('--quiet', action='store_true', dest='quiet', default=False, help='reduce printouts')
 
-parser.add_option('--qcdOnly', action='store_true', dest='qcdOnly', default=False, help='no X11 windows')
-parser.add_option('--zvvOnly', action='store_true', dest='zvvOnly', default=False, help='no X11 windows')
-parser.add_option('--tauOnly', action='store_true', dest='tauOnly', default=False, help='no X11 windows')
-parser.add_option('--llpOnly', action='store_true', dest='llpOnly', default=False, help='no X11 windows')
-parser.add_option('--allBkgs', action='store_true', dest='allBkgs', default=False, help='no X11 windows')
+parser.add_option('--qcdOnly', action='store_true', dest='qcdOnly', default=False, help='')
+parser.add_option('--zvvOnly', action='store_true', dest='zvvOnly', default=False, help='')
+parser.add_option('--tauOnly', action='store_true', dest='tauOnly', default=False, help='')
+parser.add_option('--llpOnly', action='store_true', dest='llpOnly', default=False, help='')
+parser.add_option('--allBkgs', action='store_true', dest='allBkgs', default=False, help='')
 parser.add_option("--mGo", dest="mGo", default='1000', help="Mass of Gluino", metavar="mGo")
 parser.add_option("--mLSP", dest="mLSP", default='900', help="Mass of LSP", metavar="mLSP")
 (options, args) = parser.parse_args()
@@ -40,7 +41,9 @@ if __name__ == '__main__':
     lumi = float(options.lumi);
     signalmu = float(options.mu);
     odir = 'testCards-%s-%s-%1.1f-mu%0.1f/' % ( tag,sms, lumi, signalmu );
-    idir = 'inputHistograms/histograms_%1.1ffb/' % ( ((lumi)) );
+    if len(options.dir)>0: odir = options.dir+"/"+odir
+    idir = (options.eos+"/" if len(options.eos)>0 else "") + 'inputHistograms/histograms_%1.1ffb/' % ( ((lumi)) );
+    idir_contam = (options.eos+"/" if len(options.eos)>0 else "") + 'inputHistograms/SignalContamin/';
     if os.path.exists(odir): os.system( "rm -r %s" % (odir) );
     os.makedirs(odir);
 
@@ -62,29 +65,29 @@ if __name__ == '__main__':
     #print parse
     if options.fastsim: signaltag+="_fast"
 
-    signalSFB_file =TFile(signaldirtag+"/RA2bin_signal.root");
+    signalSFB_file =TFile.Open(signaldirtag+"/RA2bin_signal.root");
 
-    signalSysSFUp_file=TFile(signaldirtag+"/RA2bin_signal_btagSFuncUp.root");
-    signalSysSFDown_file=TFile(signaldirtag+"/RA2bin_signal_btagSFuncDown.root");
-    signalSysMisSFUp_file=TFile(signaldirtag+"/RA2bin_signal_mistagSFuncUp.root");
-    signalSysMisSFDown_file=TFile(signaldirtag+"/RA2bin_signal_mistagSFuncDown.root");
-    signalSysCharmSFUp_file=TFile(signaldirtag+"/RA2bin_signal_ctagSFuncUp.root");
-    signalSysCharmSFDown_file=TFile(signaldirtag+"/RA2bin_signal_ctagSFuncDown.root");
-    signalSysTrigSystUp_file=TFile(signaldirtag+"/RA2bin_signal_trigSystUncUp.root");
-    signalSysTrigSystDown_file=TFile(signaldirtag+"/RA2bin_signal_trigSystUncDown.root");
-    signalSysTrigStatUp_file=TFile(signaldirtag+"/RA2bin_signal_trigStatUncUp.root");
-    signalSysTrigStatDown_file=TFile(signaldirtag+"/RA2bin_signal_trigStatUncDown.root");
+    signalSysSFUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_btagSFuncUp.root");
+    signalSysSFDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_btagSFuncDown.root");
+    signalSysMisSFUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_mistagSFuncUp.root");
+    signalSysMisSFDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_mistagSFuncDown.root");
+    signalSysCharmSFUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_ctagSFuncUp.root");
+    signalSysCharmSFDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_ctagSFuncDown.root");
+    signalSysTrigSystUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_trigSystUncUp.root");
+    signalSysTrigSystDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_trigSystUncDown.root");
+    signalSysTrigStatUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_trigStatUncUp.root");
+    signalSysTrigStatDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_trigStatUncDown.root");
 
-    signalSysJECUp_file    =TFile(signaldirtag+"/RA2bin_signal_JECup.root");
-    signalSysJECDown_file      =TFile(signaldirtag+"/RA2bin_signal_JECdown.root");
-    signalSysScaleUp_file      =TFile(signaldirtag+"/RA2bin_signal_scaleuncUp.root");
-    signalSysScaleDown_file    =TFile(signaldirtag+"/RA2bin_signal_scaleuncDown.root");
-    signalSysPUUp_file     =TFile(signaldirtag+"/RA2bin_signal_puuncUp.root");
-    signalSysPUDown_file       =TFile(signaldirtag+"/RA2bin_signal_puuncDown.root");
-    signalSysPDFUp_file     =TFile(signaldirtag+"/RA2bin_signal_pdfuncUp.root");
-    signalSysPDFDown_file       =TFile(signaldirtag+"/RA2bin_signal_pdfuncDown.root");
-    signalSysISRUp_file     =TFile(signaldirtag+"/RA2bin_signal_isruncUp.root");
-    signalSysISRDown_file       =TFile(signaldirtag+"/RA2bin_signal_isruncDown.root");
+    signalSysJECUp_file    =TFile.Open(signaldirtag+"/RA2bin_signal_JECup.root");
+    signalSysJECDown_file      =TFile.Open(signaldirtag+"/RA2bin_signal_JECdown.root");
+    signalSysScaleUp_file      =TFile.Open(signaldirtag+"/RA2bin_signal_scaleuncUp.root");
+    signalSysScaleDown_file    =TFile.Open(signaldirtag+"/RA2bin_signal_scaleuncDown.root");
+    signalSysPUUp_file     =TFile.Open(signaldirtag+"/RA2bin_signal_puuncUp.root");
+    signalSysPUDown_file       =TFile.Open(signaldirtag+"/RA2bin_signal_puuncDown.root");
+    signalSysPDFUp_file     =TFile.Open(signaldirtag+"/RA2bin_signal_pdfuncUp.root");
+    signalSysPDFDown_file       =TFile.Open(signaldirtag+"/RA2bin_signal_pdfuncDown.root");
+    signalSysISRUp_file     =TFile.Open(signaldirtag+"/RA2bin_signal_isruncUp.root");
+    signalSysISRDown_file       =TFile.Open(signaldirtag+"/RA2bin_signal_isruncDown.root");
     signalRegion_sigHist      = signalSFB_file.Get(signaltag);
     tagsForSignalRegion = binLabelsToList(signalRegion_sigHist);
 
@@ -164,12 +167,12 @@ if __name__ == '__main__':
 
     if options.fastsim:
 
-        signalSysbtagCFuncUp_file=TFile(signaldirtag+"/RA2bin_signal_btagCFuncUp.root");
-        signalSysbtagCFuncDown_file=TFile(signaldirtag+"/RA2bin_signal_btagCFuncDown.root");
-        signalSysctagCFuncUp_file=TFile(signaldirtag+"/RA2bin_signal_ctagCFuncUp.root");
-        signalSysctagCFuncDown_file=TFile(signaldirtag+"/RA2bin_signal_ctagCFuncDown.root");
-        signalSysmistagCFuncUp_file=TFile(signaldirtag+"/RA2bin_signal_mistagCFuncUp.root");
-        signalSysmistagCFuncDown_file=TFile(signaldirtag+"/RA2bin_signal_mistagCFuncDown.root");
+        signalSysbtagCFuncUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_btagCFuncUp.root");
+        signalSysbtagCFuncDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_btagCFuncDown.root");
+        signalSysctagCFuncUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_ctagCFuncUp.root");
+        signalSysctagCFuncDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_ctagCFuncDown.root");
+        signalSysmistagCFuncUp_file=TFile.Open(signaldirtag+"/RA2bin_signal_mistagCFuncUp.root");
+        signalSysmistagCFuncDown_file=TFile.Open(signaldirtag+"/RA2bin_signal_mistagCFuncDown.root");
 
         signalRegion_sigHistbtagCFuncUp = signalSysbtagCFuncUp_file.Get(signaltag)
         signalRegion_sigHistbtagCFuncUp.Scale(lumi/3.);
@@ -193,15 +196,15 @@ if __name__ == '__main__':
         
     # --------------------------------------------
     # z invisible
-    sphotonRegion_file = TFile(idir+"/RA2bin_GJet_PhotonBins.root");
+    sphotonRegion_file = TFile.Open(idir+"/RA2bin_GJet_PhotonBins.root");
 
-    DYinputfile = TFile(idir+"/ZinvHistos.root")
+    DYinputfile = TFile.Open(idir+"/ZinvHistos.root")
     signalRegion_zvvRatesFromDY = DYinputfile.Get("hDYvalue")
     signalRegion_zvvList = binsToList( signalRegion_zvvRatesFromDY );
 
     # --------------------------------------------
     # lost lepton
-    LL_file = TFile(idir+"/LLPrediction.root");
+    LL_file = TFile.Open(idir+"/LLPrediction.root");
     LLPrediction_Hist=LL_file.Get("Prediction_data/totalPred_LL");
     LLCS_Hist=LL_file.Get("Prediction_data/totalCS_LL");
     LLWeight_Hist=LL_file.Get("Prediction_data/avgWeight_LL");
@@ -381,7 +384,7 @@ if __name__ == '__main__':
 
     # --------------------------------------------
     # hadronic tau
-    HadTau_file = TFile(idir+"/HadTauEstimation_data.root");
+    HadTau_file = TFile.Open(idir+"/HadTauEstimation_data.root");
     HadTauPrediction_Hist=HadTau_file.Get("searchBin_nominal")
     #HadTauSqrtSumw2_Hist=HadTauSumw_file.Get("SqrtSumW2")
     HadTauBMistagUp_Hist=HadTau_file.Get("searchBin_BMistagUp")    
@@ -449,14 +452,20 @@ if __name__ == '__main__':
         HadTauIsoTkEffSysDn.append(1.0/HadTauIsoTkEffHistSys[i])
     # --------------------------------------------
     # QCD, low delta phi
+    
+    #retrieve file if needed
+    fname_qcd = idir+"/qcd-bg-combine-input.txt"
+    if len(options.eos)>0:
+        os.system("xrdcp %s ." % fname_qcd)
+        fname_qcd = "qcd-bg-combine-input.txt"
 
     ratesForSignalRegion_QCDList = [];
-    NSRForSignalRegion_QCDList = textToList(idir+"/qcd-bg-combine-input.txt",6);
+    NSRForSignalRegion_QCDList = textToList(fname_qcd,6);
     ratesForLowdphiRegion_QCDList = [];
-    NCRForLowdphiRegion_QCDList = textToList(idir+"/qcd-bg-combine-input.txt",2);
+    NCRForLowdphiRegion_QCDList = textToList(fname_qcd,2);
     obsForLowdphiRegion_QCDList = [];
-    ratiosForLowdphiRegion = textToList(idir+"/qcd-bg-combine-input.txt",5);
-    ContaminForLowdphiRegion = textToList(idir+"/qcd-bg-combine-input.txt",3);
+    ratiosForLowdphiRegion = textToList(fname_qcd,5);
+    ContaminForLowdphiRegion = textToList(fname_qcd,3);
     tagsForLowDPhiRegion = tagsForSignalRegion[:]
     QCDcontributionsPerBin = [];
     for i in range(len(tagsForLowDPhiRegion)): 
@@ -646,13 +655,13 @@ if __name__ == '__main__':
     signalRegion_Rates = [];
     signalRegion_Obs = [];
     controlRegion_Rates=[];
-    f = TFile(odir+'yields.root', 'recreate')
+    f = TFile.Open(odir+'yields.root', 'recreate')
     data = TH1F( 'data', 'data', 72, 0, 72 )
     qcd = TH1F( 'QCD', 'QCD', 72, 0, 72 )
     zvv = TH1F( 'Zvv', 'Zvv', 72, 0, 72 )
     ll = TH1F( 'LL', 'LL', 72, 0, 72 )
     tau = TH1F( 'tau', 'tau', 72, 0, 72 )
-    DataHist_In=TFile("inputHistograms/histograms_%1.1ffb/RA2bin_signalUnblind.root" %lumi)
+    DataHist_In=TFile.Open(idir+"/RA2bin_signalUnblind.root")
     Data_Hist=DataHist_In.Get("RA2bin_data")
     Data_List=binsToList(Data_Hist)
     for i in range(signalRegion._nBins):
@@ -677,14 +686,15 @@ if __name__ == '__main__':
 
         tmpList = [];
         if options.fastsim and ('T1t' in model or 'T5qqqqVV' in model) :
-            signalContamLL_file=TFile("inputHistograms/SignalContamin/LLContamination_%s.root" %model)
-            signalContamTau_file=TFile("inputHistograms/SignalContamin/Signal%sHtauContamin.root" %model)
+            signalContamLL_file=TFile.Open(idir_contam+"/LLContamination_%s.root" %model)
+            signalContamTau_file=TFile.Open(idir_contam+"/Signal%sHtauContamin.root" %model)
             TauContamHist =signalContamTau_file.Get("SearchH_b/"+signaltag)
-            TauContamHist.Scale(lumi/3.0)
+            if TauContamHist: TauContamHist.Scale(lumi/3.0)
             LLContamHist=signalContamLL_file.Get("SignalContamination/mGluino_%s_mLSP_%s" %(options.mGo, options.mLSP))
         #    LLContamHist.Scale(lumi/3.0)    
             LLContamList=binsToList(LLContamHist)
-            HadtauContamList=binsToList(TauContamHist)  
+            if TauContamHist: HadtauContamList=binsToList(TauContamHist)  
+            else: HadtauContamList=[0]*len(LLContamList)
             tmpList.append(signalRegion_sigList[i]-LLContamList[i]-HadtauContamList[i]);
         else:
             tmpList.append(signalRegion_sigList[i])
@@ -989,18 +999,17 @@ if __name__ == '__main__':
     ### QCD uncertainties ------------------------------------------------------------------------------
     if options.allBkgs or options.qcdOnly:    
 
-        ListOfQCDSysK1 = textToListStr(idir+"/qcd-bg-combine-input.txt",7)
-        ListOfQCDSysK2 = textToListStr(idir+"/qcd-bg-combine-input.txt",8)
-        ListOfQCDSysK3 = textToListStr(idir+"/qcd-bg-combine-input.txt",9)
-        ListOfQCDSysK4 = textToListStr(idir+"/qcd-bg-combine-input.txt",10)
-        ListOfQCDSysK5 = textToListStr(idir+"/qcd-bg-combine-input.txt",11)
-        ListOfQCDSysK6 = textToListStr(idir+"/qcd-bg-combine-input.txt",12)
-        ListOfQCDSysK7 = textToListStr(idir+"/qcd-bg-combine-input.txt",13)
-        ListOfQCDSysK8 = textToListStr(idir+"/qcd-bg-combine-input.txt",14)    
-
-        ListOfQCDSysK9 = textToListStr(idir+"/qcd-bg-combine-input.txt",15)
-        ListOfQCDSysK10 = textToListStr(idir+"/qcd-bg-combine-input.txt",16)
-        ContaminUncForLowdphiRegion = textToList(idir+"/qcd-bg-combine-input.txt",4);
+        ListOfQCDSysK1 = textToListStr(fname_qcd,7)
+        ListOfQCDSysK2 = textToListStr(fname_qcd,8)
+        ListOfQCDSysK3 = textToListStr(fname_qcd,9)
+        ListOfQCDSysK4 = textToListStr(fname_qcd,10)
+        ListOfQCDSysK5 = textToListStr(fname_qcd,11)
+        ListOfQCDSysK6 = textToListStr(fname_qcd,12)
+        ListOfQCDSysK7 = textToListStr(fname_qcd,13)
+        ListOfQCDSysK8 = textToListStr(fname_qcd,14)
+        ListOfQCDSysK9 = textToListStr(fname_qcd,15)
+        ListOfQCDSysK10 = textToListStr(fname_qcd,16)
+        ContaminUncForLowdphiRegion = textToList(fname_qcd,4);
         for i in range(len(tagsForSignalRegion)):
             signalRegion.addSingleSystematic("ldpCR"+str(i),'lnU','qcd',10000,'',i);
             LowdphiControlRegion.addSingleSystematic("ldpCR"+str(i),'lnU','qcd',10000,'',i);    
@@ -1026,6 +1035,7 @@ if __name__ == '__main__':
     signalRegion.systRange( odir, 0 );
     signalRegion.systRange( odir, 1 );
     signalRegion.systRange( odir, 2 );
+    signalRegion.systRange( odir, 3 );
     signalRegion.writeCards( odir );
     if options.allBkgs or options.llpOnly or  (options.tauOnly and  options.llpOnly) or options.tauOnly: SLcontrolRegion.writeCards( odir );
     # if options.allBkgs or options.tauOnly: HadcontrolRegion.writeCards( odir );

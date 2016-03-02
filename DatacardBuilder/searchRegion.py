@@ -129,30 +129,53 @@ class searchRegion:
         for ibin in self._singleBins:
             # calculate bin sensitivity Q
             bkg_tot = sum(ibin._rates[1:])
-            sig_tot = ibin._rates[0]
+            sig_tot = max(ibin._rates[0],0.0) # sometimes signal yield goes negative b/c CR contamination...
             Q = 2*(sqrt(sig_tot + bkg_tot) - sqrt(bkg_tot))
+            avg = 0
             if method==0: Q = 1.0
             elif method==1:
                 if Q < minten: continue
                 else: Q = 1.0
             if norm_Q == -1 or norm_Q < Q: norm_Q = Q
-            for isyst in ibin._allSysts:
+            allSysts = ibin._allSysts[:]
+            # add an extra syst which is the quadrature sum of all previous systs
+            allSysts.append(systLine("Total","lnN",['sig'],[[1]]))
+            syst_tot = 0
+            for isyst in allSysts:
                 # only check signal systematics, assume not correlated with any bkgs
                 if 'sig' not in isyst._bins: continue
                 # get range of this syst
                 irange = 0
-                if len(isyst._vals[0])==1: irange = abs(1-isyst._vals[0][0])
+                if isyst._name=="Total": irange = sqrt(syst_tot)
+                elif len(isyst._vals[0])==1: irange = abs(1-isyst._vals[0][0])
                 elif len(isyst._vals[0])==2: irange = max(abs(1-isyst._vals[0][0]),abs(1-isyst._vals[0][1]))
                 # weight range based on Q (normalize later)
+                syst_tot += irange**2
                 irange *= Q
+                if Q>0: irange2 = irange**2/Q
+                else: irange2 = 0
                 # check min and max
                 tmp_minmax = syst_minmax.get(isyst._name,[1e10, 0])
-                syst_minmax[isyst._name] = [min( tmp_minmax[0], irange ), max( tmp_minmax[1], irange )]
+                if method==3: #sum up in min, sum of squares in max
+                    if tmp_minmax[1]==0: syst_minmax[isyst._name] = [irange,irange2]
+                    else: syst_minmax[isyst._name] = [tmp_minmax[0]+irange,tmp_minmax[1]+irange2]
+                else:
+                    syst_minmax[isyst._name] = [min( tmp_minmax[0], irange ), max( tmp_minmax[1], irange )]
 
         # normalize ranges and make %
         maxSystNameLength = 0
         for k, v in syst_minmax.iteritems():
-            syst_minmax[k] = [v[0]/norm_Q*100, v[1]/norm_Q*100]
+            if method==3:
+                sumw = sum(all_Q)
+                sumw2 = sum([i**2 for i in all_Q])
+                avg = v[0]/sumw
+                var = abs(v[1]/sumw - avg**2)
+                neff = sumw**2/sumw2
+                # sqrt(var/neff) = std error of the weighted avg
+                stderr = sqrt(var/neff)
+                syst_minmax[k] = [(avg-stderr)*100, (avg+stderr)*100]
+            else:
+                syst_minmax[k] = [v[0]/norm_Q*100, v[1]/norm_Q*100]
             if len(k) > maxSystNameLength: maxSystNameLength = len(k)
 
         # output results
