@@ -49,7 +49,7 @@ if __name__ == "__main__": # to run from command line, just give the name of the
     import sys
     output_file = sys.argv[1]
     f_lostlept = TFile.Open(sys.argv[3])
-    lostlept = BGEst(f_lostlep.Get("ASR/hCV"), f_lostlept.Get("ASR/hStatUp"), f_lostlept.Get("ASR/hStatDown"), f_lostlept.Get("ASR/hSystUp"), f_lostlept.Get("ASR/hSystDown"))
+    lostlept = BGEst(f_lostlept.Get("ASR/hCV"), f_lostlept.Get("ASR/hStatUp"), f_lostlept.Get("ASR/hStatDown"), f_lostlept.Get("ASR/hSystUp"), f_lostlept.Get("ASR/hSystDown"))
     f_znn = TFile.Open(sys.argv[4])
     znn = BGEst(f_znn.Get("ASR/hCV"), f_znn.Get("ASR/hStatUp"), f_znn.Get("ASR/hStatDown"), f_znn.Get("ASR/hSystUp"), f_znn.Get("ASR/hSystDown"))
     f_qcd = TFile.Open(sys.argv[5])
