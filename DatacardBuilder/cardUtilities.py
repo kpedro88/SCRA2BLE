@@ -23,9 +23,9 @@ def hutil_clone0BtoNB(h_in,useFactors=True):
 
 	for i in range(h_new.GetNbinsX()):
 		binlabel = h_new.GetXaxis().GetBinLabel(i+1);
-		
+
 		ref_binlabel = None;
-		for trans in translations: 
+		for trans in translations:
 			if trans[0] in binlabel:
 				ref_binlabel = re.sub("BTags.","BTags0",binlabel)
 				newBinContent = -99;
@@ -44,10 +44,10 @@ def hutil_PhotonRatioFix(h_gjet,h_zvv):
 	hout_zvv = h_zvv.Clone();
 
 	for i in range(h_gjet.GetNbinsX()):
-		if h_gjet.GetBinContent(i+1) < 1: 
+		if h_gjet.GetBinContent(i+1) < 1:
 			hout_gjet.SetBinContent( i+1, 1. );
 			hout_zvv.SetBinContent( i+1, h_zvv.GetBinContent(i+1) );
-		else: 
+		else:
 			hout_gjet.SetBinContent( i+1, h_gjet.GetBinContent(i+1) );
 			hout_zvv.SetBinContent( i+1, h_gjet.GetBinContent(i+1)*h_zvv.GetBinContent(i+1) );
 
@@ -55,7 +55,7 @@ def hutil_PhotonRatioFix(h_gjet,h_zvv):
 
 
 def getSystematicsListQCD(fn):
-	
+
 	sysnames = ['Kht1','Kht2','Kht3','Kmht2','Kmht3','Kmht4','Knj2','Knj3','Knj4','Knj5'];
 
 	allSystematics = [];
@@ -117,9 +117,9 @@ def textToList(fn,column):
 	return olist;
 
 def textToListStr(fn,column):
-        olist = [];
-        f = open(fn,'r');
-        for line in f:
-                olist.append((line.strip().split()[column]) );
-        return olist;
+	olist = [];
+	f = open(fn,'r');
+	for line in f:
+		olist.append((line.strip().split()[column]) );
+	return olist;
 

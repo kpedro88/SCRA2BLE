@@ -16,12 +16,12 @@ class singleBin:
 	def setRates( self, rates, normalize = False ):
 
 		self._observed = float(sum(rates));
-		
+
 		# print self._index, self._observed, rates
 
 		self._rates = [];
-		if normalize: 
-			if self._observed > 0: 
+		if normalize:
+			if self._observed > 0:
 				self._rates = [x / self._observed for x in rates];
 			else : self._rates = [1.]*len(rates);
 		else: self._rates = rates;
@@ -32,7 +32,7 @@ class singleBin:
 		# yield part of the datacard
 		line = "#the tag = %s \n" % (self._tag);
 		self._allLines.append(line);
-		
+
 		line = "imax 1 #number of channels \n";
 		self._allLines.append(line);
 		line = "jmax %i #number of backgrounds \n" % (len(self._binLabels)-1);
@@ -43,7 +43,7 @@ class singleBin:
 
 		line = "bin Bin"+self._name+"\n";
 		self._allLines.append(line);
-		
+
 		line = "observation "+str(self._observed)+"\n";
 		self._allLines.append(line);
 
@@ -84,108 +84,108 @@ class singleBin:
 			if self._binLabels[i] in bins:
 				#print self._binLabels[i]
 				if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1) + " ";
-				else: 
+				else:
 					if(val>-99.):
 						line += str(val) + " ";
-					else: 
+					else:
 						line += " - ";
 			else: line += "- ";
 		line += "\n";
 		self._allLines.append(line);
 
 	def addCorrelSystematic(self,sysname,systype,bins,val1, val2):
-                #print sysname
-                # print "length rates = ",len(self._rates)
-                line = "";
-                line += sysname + " " + systype + " ";
-                bin=0;
-                for i in range(len(self._binLabels)):
-                        #print len(self._binLabels)
-                        if self._binLabels[i] in bins:
-                                #print self._binLabels[i]
-                                if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1) + " ";
-                                else:
+		#print sysname
+		# print "length rates = ",len(self._rates)
+		line = "";
+		line += sysname + " " + systype + " ";
+		bin=0;
+		for i in range(len(self._binLabels)):
+			#print len(self._binLabels)
+			if self._binLabels[i] in bins:
+				#print self._binLabels[i]
+				if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1) + " ";
+				else:
 					if val1>-99. and val2>-99.:
-                                        	if(bin==0):
-                                                	line += str(val1) + " ";
+						if(bin==0):
+							line += str(val1) + " ";
 						if(bin==1):
 							line += str(val2) + " ";
-                                        else:
-                                                line += " - ";
+					else:
+						line += " - ";
 					bin+=1
-                        else: line += "- ";
-                line += "\n";
-                self._allLines.append(line);
+			else: line += "- ";
+		line += "\n";
+		self._allLines.append(line);
 
 	def addCorrelSystematicAsym(self,sysname,systype,bins,val1up, val1dn, val2up,val2dn):
-                #print sysname
-                # print "length rates = ",len(self._rates)
-                line = "";
-                line += sysname + " " + systype + " ";
-                bin=0;
-                for i in range(len(self._binLabels)):
-                        #print len(self._binLabels)
-                        if self._binLabels[i] in bins:
-                                #print self._binLabels[i]
+		#print sysname
+		# print "length rates = ",len(self._rates)
+		line = "";
+		line += sysname + " " + systype + " ";
+		bin=0;
+		for i in range(len(self._binLabels)):
+			#print len(self._binLabels)
+			if self._binLabels[i] in bins:
+				#print self._binLabels[i]
 				if val1up>-99. and val2up>-99.:
-                                	if(bin==0):line += str(val1dn) + "/" + str(val1up);
+					if(bin==0):line += str(val1dn) + "/" + str(val1up);
 					if(bin==1):line += str(val2dn) + "/" +str(val2up);
-                                else:
-                                     line += " - ";
+				else:
+				     line += " - ";
 				bin+=1
-                        else: line += " - ";
-                line += "\n";
-                self._allLines.append(line);
-        def addGammaCorrelSystematic(self,sysname,systype,bins,valCS,val1,val2):
-                #print sysname
-                # print "length rates = ",len(self._rates)
-                #print bins,val
-                line = "";
-                line += sysname + " " + systype + " "+ "%d " %int(valCS);
-                bin=0;
-                for i in range(len(self._binLabels)):
-                        #print len(self._binLabels)
-                        if self._binLabels[i] in bins:
-                                #print self._binLabels[i]
-                                if(val1>-99. and val2>-99):
-                                        if(bin==0 ):line += " %0.4f " %round(val1,4);
-                                        if(bin==1 ):line += " %0.4f " %round(val2,4);
-                                else:
-                                        line += " - ";
-                                bin+=1
-                        else: line += "- ";
-                line += "\n";
-                self._allLines.append(line);
-        def addGammaSystematic(self,sysname,systype,bins,valCS,val):
-                #print sysname
-                # print "length rates = ",len(self._rates)
-                #print bins,val
-                line = "";
-                line += sysname + " " + systype + " "+ "%d " %int(valCS);
-                bin=0;
-                for i in range(len(self._binLabels)):
-                        #print len(self._binLabels)
-                        if self._binLabels[i] in bins:
-                                #print self._binLabels[i]
-                                if(val>-99.):
-                                        if(bin==0 or bin==1):
-                                                if valCS>0:line += " %g " %val ;
-                                                else: line+= " %0.3f " %(round(val,4));
-                                else:
-                                        line += " - ";
-                                bin+=1
-                        else: line += "- ";
-                line += "\n";
-                self._allLines.append(line);	
+			else: line += " - ";
+		line += "\n";
+		self._allLines.append(line);
+	def addGammaCorrelSystematic(self,sysname,systype,bins,valCS,val1,val2):
+		#print sysname
+		# print "length rates = ",len(self._rates)
+		#print bins,val
+		line = "";
+		line += sysname + " " + systype + " "+ "%d " %int(valCS);
+		bin=0;
+		for i in range(len(self._binLabels)):
+			#print len(self._binLabels)
+			if self._binLabels[i] in bins:
+				#print self._binLabels[i]
+				if(val1>-99. and val2>-99):
+					if(bin==0 ):line += " %0.4f " %round(val1,4);
+					if(bin==1 ):line += " %0.4f " %round(val2,4);
+				else:
+					line += " - ";
+				bin+=1
+			else: line += "- ";
+		line += "\n";
+		self._allLines.append(line);
+	def addGammaSystematic(self,sysname,systype,bins,valCS,val):
+		#print sysname
+		# print "length rates = ",len(self._rates)
+		#print bins,val
+		line = "";
+		line += sysname + " " + systype + " "+ "%d " %int(valCS);
+		bin=0;
+		for i in range(len(self._binLabels)):
+			#print len(self._binLabels)
+			if self._binLabels[i] in bins:
+				#print self._binLabels[i]
+				if(val>-99.):
+					if(bin==0 or bin==1):
+						if valCS>0:line += " %g " %val ;
+						else: line+= " %0.3f " %(round(val,4));
+				else:
+					line += " - ";
+				bin+=1
+			else: line += "- ";
+		line += "\n";
+		self._allLines.append(line)
 	def addAsymSystematic(self,sysname,systype,bins,valup, valdown ):
 		line = "";
 		line += sysname + " " + systype + " ";
 		bin=0;
-		for i in range(len(self._binLabels)): 
+		for i in range(len(self._binLabels)):
 			if self._binLabels[i] in bins:
 				#print self._binLabels[i]
 				if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1) + " ";
-				else: 
+				else:
 					if(valdown>-99. and valup>-99.):
 						if not valdown>0.0:valdown=0.01
 						if not valup>0.0:valup=0.01
@@ -196,7 +196,7 @@ class singleBin:
 		self._allLines.append(line);
 
 	def writeCard( self, odir ):
-		
+
 		ofile = open(odir+'/card_'+self._name+'.txt','w');
 		for line in self._allLines: ofile.write(line);
 		#ofile.write("* autoMCStats 0 ")
