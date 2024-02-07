@@ -24,5 +24,6 @@ def get_options():
 
 	return options
 
-yearsToMerge=["MC2016","MC2017","MC2018", "MC2018HEM"]
+#yearsToMerge=["MC2016","MC2017","MC2018", "MC2018HEM"]
+yearsToMerge=["MC2017","MC2018", "MC2018HEM"]
 RunLumi=[ 35916.403 , 41521.425,21000.905,38196.951 ]
