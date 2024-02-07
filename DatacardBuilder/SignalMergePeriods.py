@@ -100,7 +100,6 @@ def MHTSystematicGenMHT(signaldirtag,signaltag, yearsToCombine,lumiscales):
 		GENSignal.SetName("Gen%s_%s" %(signaltag,yearsToCombine[i]))
 		GenCorrSignal.Add(GENSignal)
 		NominalCorrSignal.Add(SignalRun)
-		#print SignalRun.Integral()
 		SignalRunFile.Close();
 
 	def _fn(bN,b1):
@@ -131,15 +130,16 @@ def MergeSignal(signaldirtag,signaltag, yearsToCombine, lumiscales):
 		SignalRun.Scale(lumiscales[i])
 		SignalRun.SetName("%s_%s" %(signaltag,yearsToCombine[i]))
 		if "MC2018" in yearsToCombine[i] and not "MC2018HEM" in yearsToCombine[i]:
-			#print "special case"
 			MergedCorrelated=SignalRun.Clone("MergedCorrelated");
 			SignalRunFileHEM=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[i+1]))
 			SignalRunHEM=SignalRunFileHEM.Get("RA2bin_%s_%s_fast_nominalOrig" %(signaltag,yearsToCombine[i+1]))
 			SignalRunHEM.Scale(lumiscales[i+1])
 			SignalRunHEM.SetName("%s_%s" %(signaltag,yearsToCombine[i+1]))
-			for j in range(1, 175):
-				SignalRun.SetBinContent(j, MergedCorrelated.GetBinContent(j)+SignalRunHEM.GetBinContent(j))
-				SignalRun.SetBinError(j, MergedCorrelated.GetBinError(j)+SignalRunHEM.GetBinError(j))
+			SignalRunHEMOrig = SignalRunHEM.Clone("HEMOrig")
+			SignalRunHEM.Add(MergedCorrelated)
+			def _fn(bN,b1):
+				SignalRunHEM.SetBinError(bN, MergedCorrelated.GetBinError(bN)+SignalRunHEMOrig.GetBinError(bN))
+			loopTHN(SignalRunHEM,_fn)
 
 		if "MC2018HEM" in yearsToCombine[i]:continue
 		MergedSignal.Add(SignalRun);
@@ -147,7 +147,6 @@ def MergeSignal(signaldirtag,signaltag, yearsToCombine, lumiscales):
 
 	MergedSignal.SetName("RA2bin_%s_fast_nominalOrig" %signaltag)
 	return MergedSignal;
-	#return MergedSignal
 
 def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2):
 	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2016_fast.root" %(signaltag))
@@ -159,70 +158,67 @@ def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,
 		SignalRunFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[i]))
 		SignalRun=SignalRunFile.Get("RA2bin_%s_%s_fast_nominalOrig" %(signaltag,yearsToCombine[i]));
 		SignalRunUnc=SignalRunFile.Get("RA2bin_%s_%s_fast_%s" %(signaltag,yearsToCombine[i],Unc));
-		#print SignalRunUnc
-		#SignalRunFile.Close();
 		SignalRun.Scale(lumiscales[i])
-		sign=[]
-		for b in range(1,MergedUnc.GetNbinsX()+1):
-			UncQuadSum=MergedUnc.GetBinContent(b)+pow((SignalRun.GetBinContent(b)*abs(1-SignalRunUnc.GetBinContent(b))),2);
-			#sign=1.0
-			if SignalRunUnc.GetBinContent(b)>=1.0:sign.append(1.0)
-			else: sign.append(-1.0)
-			MergedUnc.SetBinContent(b, UncQuadSum);
+		sign={}
+		def _fn(bN,b1):
+			UncQuadSum=MergedUnc.GetBinContent(bN)+pow((SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN))),2);
+			if SignalRunUnc.GetBinContent(bN)>=1.0: sign[bN] = 1.0
+			else: sign[bN] = -1.0
+			MergedUnc.SetBinContent(bN, UncQuadSum);
+		loopTHN(MergedUnc,_fn)
 		SignalRunFile.Close();
-	#print sign;
-	for b in range(1,MergedUnc.GetNbinsX()+1):
-			if MergedUnc.GetBinContent(b)>0:
-				MergedUnc.SetBinContent(b,1.0+sign[b-1]*(sqrt(MergedUnc.GetBinContent(b))/MergedFullRun2.GetBinContent(b)));
-			else: MergedUnc.SetBinContent(b,1.0);
+	def _fn(bN,b1):
+		if MergedUnc.GetBinContent(bN)>0:
+			MergedUnc.SetBinContent(bN,1.0+sign[bN]*(sqrt(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN)));
+		else: MergedUnc.SetBinContent(bN,1.0);
+	loopTHN(MergedUnc,_fn)
 	return MergedUnc;
+
 def MergeUncCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2,isUp):
 	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2016_fast.root" %(signaltag))
 	MergedUnc=SigTempFile.Get("RA2bin_%s_MC2016_fast_%s" %(signaltag,Unc))
 	MergedUnc.Reset();
 	MergedUnc.SetDirectory(0)
 	SigTempFile.Close();
-	#for i in range(0,2):
 	for i in range(len(yearsToCombine)):
 		SignalRunFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[i]))
 		SignalRun=SignalRunFile.Get("RA2bin_%s_%s_fast_nominalOrig" %(signaltag,yearsToCombine[i]));
 		SignalRunUnc=SignalRunFile.Get("RA2bin_%s_%s_fast_%s" %(signaltag,yearsToCombine[i],Unc));
-		#for b in range(1,SignalRunUnc.GetNbinsX()+1):
-			#if "lumi" in Unc and yearsToCombine[i]=="MC2017":
-			#	SignalRunUnc.SetBinContent(b, 1.023);
-		#SignalRunFile.Close();
 		SignalRun.Scale(lumiscales[i])
-		for b in range(1,MergedUnc.GetNbinsX()+1):
-			UncQuadSum=MergedUnc.GetBinContent(b)+(SignalRun.GetBinContent(b)*abs(1-SignalRunUnc.GetBinContent(b)));
-			MergedUnc.SetBinContent(b, UncQuadSum);
+		def _fn(bN,b1):
+			UncQuadSum=MergedUnc.GetBinContent(bN)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
+			MergedUnc.SetBinContent(bN, UncQuadSum);
+		loopTHN(MergedUnc,_fn)
 		SignalRunFile.Close();
-	for b in range(1,MergedUnc.GetNbinsX()+1):
-			if MergedFullRun2.GetBinContent(b)>0:
-				if isUp :MergedUnc.SetBinContent(b,  1.0+(MergedUnc.GetBinContent(b))/MergedFullRun2.GetBinContent(b));
-				else:MergedUnc.SetBinContent(b,  1.0-(MergedUnc.GetBinContent(b))/MergedFullRun2.GetBinContent(b));
-			else: MergedUnc.SetBinContent(b,1.0);
+	def _fn(bN,b1):
+		if MergedFullRun2.GetBinContent(bN)>0:
+			if isUp: MergedUnc.SetBinContent(bN, 1.0+(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
+			else:MergedUnc.SetBinContent(bN, 1.0-(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
+		else: MergedUnc.SetBinContent(bN,1.0);
+	loopTHN(MergedUnc,_fn)
 	return MergedUnc;
+
 def MergeUncPreFireCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2,isUp):
 	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2016_fast.root" %(signaltag))
 	MergedUnc=SigTempFile.Get("RA2bin_%s_MC2016_fast_%s" %(signaltag,Unc))
 	MergedUnc.Reset();
 	MergedUnc.SetDirectory(0)
 	SigTempFile.Close();
-	#for i in range(0,2):
 	for i in range(len(yearsToCombine)):
 		if "2018" in yearsToCombine[i]:continue #NO Prefire unc
 		SignalRunFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[i]))
 		SignalRun=SignalRunFile.Get("RA2bin_%s_%s_fast_nominalOrig" %(signaltag,yearsToCombine[i]));
 		SignalRunUnc=SignalRunFile.Get("RA2bin_%s_%s_fast_%s" %(signaltag,yearsToCombine[i],Unc));
-		#SignalRunFile.Close();
 		SignalRun.Scale(lumiscales[i])
-		for b in range(1,MergedUnc.GetNbinsX()+1):
-			UncQuadSum=MergedUnc.GetBinContent(b)+(SignalRun.GetBinContent(b)*abs(1-SignalRunUnc.GetBinContent(b)));
-			MergedUnc.SetBinContent(b, UncQuadSum);
+		def _fn(bN,b1):
+			UncQuadSum=MergedUnc.GetBinContent(bN)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
+			MergedUnc.SetBinContent(bN, UncQuadSum);
+		loopTHN(MergedUnc,_fn)
 		SignalRunFile.Close();
-	for b in range(1,MergedUnc.GetNbinsX()+1):
-			if MergedFullRun2.GetBinContent(b)>0:
-				if isUp :MergedUnc.SetBinContent(b,  1.0+(MergedUnc.GetBinContent(b))/MergedFullRun2.GetBinContent(b));
-				else:MergedUnc.SetBinContent(b,  1.0-(MergedUnc.GetBinContent(b))/MergedFullRun2.GetBinContent(b));
-			else: MergedUnc.SetBinContent(b,1.0);
+	def _fn(bN,b1):
+		if MergedFullRun2.GetBinContent(bN)>0:
+			if isUp: MergedUnc.SetBinContent(bN, 1.0+(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
+			else:MergedUnc.SetBinContent(bN, 1.0-(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
+		else: MergedUnc.SetBinContent(bN,1.0);
+	loopTHN(MergedUnc,_fn)
 	return MergedUnc;
