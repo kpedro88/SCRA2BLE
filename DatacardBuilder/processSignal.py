@@ -83,5 +83,6 @@ if __name__ == '__main__':
 	for k,v in systs.iteritems():
 		v.Write(k)
 	ofile.Close()
-#	os.system("xrdcp -f {0} {1}/{0}".format(ofilename,options.sigDir))
-#	os.remove(ofilename)
+	if options.transfer:
+		os.system("xrdcp -f {0} {1}/{0}".format(ofilename,options.sigDir))
+		os.remove(ofilename)

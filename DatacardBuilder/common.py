@@ -11,6 +11,7 @@ def get_options():
 	parser_model.add_argument("--set", dest="set", default=None, type=str, help="pMSSM set name", metavar="set")
 	parser.add_argument('--realData',action='store_true', dest='realData', default=False, help='use real data')
 	parser.add_argument('--sigDir',dest="sigDir", default="root://cmseos.fnal.gov//store/user/pedrok/SUSY2015/Analysis/Datacards/Run2ProductionV17_v1/", type=str, help='input signal histogram directory', metavar="sigDir")
+	parser.add_argument('--transfer',action='store_true', dest='transfer', default=False, help='transfer output back to input dir')
 	options = parser.parse_args()
 
 	# postprocessing
