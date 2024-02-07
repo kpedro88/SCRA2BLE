@@ -7,19 +7,19 @@ def get_options():
 	parser.add_argument("--signal", dest="signal", type=str, required=True, help="model name (e.g. T1tttt)", metavar="signal")
 	parser.add_argument("--lumi", dest="lumi", default = 10., type=float, help="luminosity in fb-1", metavar="lumi")
 	parser_model = parser.add_mutually_exclusive_group()
-	parser_sms = parser_model.add_group()
-	parser_sms.add_argument("--mGo", dest="mGo", default=1000, type=int, help="Mass of Gluino", metavar="mGo")
-	parser_sms.add_argument("--mLSP", dest="mLSP", default=900, type=int, help="Mass of LSP", metavar="mLSP")
-	parser_model.add_argument("--set", dest="set", default="set1prompt1", type=str, help="pMSSM set name", metavar="set")
+	parser_model.add_argument("--masses", dest="masses", default=None, type=int, nargs=2, help="Mass of Gluino, mass of LSP", metavar=("mGo","mLSP"))
+	parser_model.add_argument("--set", dest="set", default=None, type=str, help="pMSSM set name", metavar="set")
 	parser.add_argument('--realData',action='store_true', dest='realData', default=False, help='use real data')
 	parser.add_argument('--sigDir',dest="sigDir", default="root://cmseos.fnal.gov//store/user/pedrok/SUSY2015/Analysis/Datacards/Run2ProductionV17_v1/", type=str, help='input signal histogram directory', metavar="sigDir")
 	options = parser.parse_args()
 
 	# postprocessing
-	if hasattr(options,'set'):
+	if options.set is not None:
 		options.sms = options.signal+'_'+options.set
 	else:
-		options.sms = options.signal+'_'+options.mGo+'_'+options.mLSP
+		options.mGo = options.masses[0]
+		options.mLSP = options.masses[1]
+		options.sms = "{}_{}_{}".format(options.signal,options.mGo,options.mLSP)
 
 	return options
 

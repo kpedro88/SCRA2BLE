@@ -7,11 +7,11 @@ from cardUtilities import *
 from SignalMergePeriods import *
 from common import *
 
-def NominalSignal(inputfile,sms,yearsToMerge,RunLumi):
-	MergedFullRun2=MergeSignal(inputfile,sms,yearsToMerge,RunLumi);
+def NominalSignal(signaldirtag,sms,yearsToMerge,RunLumi):
+	MergedFullRun2=MergeSignal(signaldirtag,sms,yearsToMerge,RunLumi);
 	MergedFullRun2.SetName("RA2bin_%s_fast_nominalOrig" %(sms))
 	MHTCorr_Unc=[]
-	if "T1tttt" in signal or "T2tt" in signal or "T5qqqqVV" in signal or "pMSSM" in signal:
+	if "T1tttt" in sms or "T2tt" in sms or "T5qqqqVV" in sms or "pMSSM" in sms:
 		MHTCorr_Unc=SubtractSignalContamination(signaldirtag,sms,yearsToMerge,RunLumi)
 	else:MHTCorr_Unc=MHTSystematicGenMHT(signaldirtag,sms, yearsToMerge,RunLumi);
 	return MHTCorr_Unc
@@ -68,12 +68,6 @@ def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi):
 if __name__ == '__main__':
 	options = get_options()
 
-	ofile
-	odir = 'testCards-Moriond-%s-%1.1f/' % ( sms, lumi );
-	#forcefully remove directory if it exists
-	if os.path.exists(odir): os.system( "rm -rf %s" % (odir) );
-	os.makedirs(odir);
-
 	# --------------------------------------------
 	# signal
 
@@ -89,5 +83,5 @@ if __name__ == '__main__':
 	for k,v in systs.iteritems():
 		v.Write(k)
 	ofile.Close()
-	os.system("xrdcp -f {0} {1}/{0}".format(ofilename,options.sigDir))
-	os.remove(ofilename)
+#	os.system("xrdcp -f {0} {1}/{0}".format(ofilename,options.sigDir))
+#	os.remove(ofilename)

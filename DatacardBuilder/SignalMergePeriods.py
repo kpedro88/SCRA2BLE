@@ -12,8 +12,12 @@ def loopTHN(hist,fn):
 	if hist.InheritsFrom(THnSparse.Class()):
 		iter = THnIter(hist)
 		b = long(0)
-		while (b = iter.Next()) >= 0:
-			fn(b,iter.GetCoord(2))
+		while True:
+			b = iter.Next()
+			if b>0:
+				fn(b,iter.GetCoord(2))
+			else:
+				break
 	else:
 		for b in range(1,hist.GetNbinsX()+1):
 			fn(b,b)
