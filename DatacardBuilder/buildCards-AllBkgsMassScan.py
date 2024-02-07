@@ -19,7 +19,7 @@ def NominalSignal(inputfile,signal,mGo,mLSP,yearsToMerge,RunLumi):
 	MergedFullRun2=MergeSignal(inputfile,sms,yearsToMerge,RunLumi);
 	MergedFullRun2.SetName("RA2bin_%s_fast_nominalOrig" %(sms))
 	MHTCorr_Unc=[]
-	if "T1tttt" in signal or "T2tt" in signal or "T5qqqqVV" in signal:MHTCorr_Unc=SubstractSignalContamination(signaldirtag,signal,mGo, mLSP,yearsToMerge,RunLumi)
+	if "T1tttt" in signal or "T2tt" in signal or "T5qqqqVV" in signal:MHTCorr_Unc=SubtractSignalContamination(signaldirtag,signal,mGo, mLSP,yearsToMerge,RunLumi)
 	else:MHTCorr_Unc=MHTSystematicGenMHT(signaldirtag,sms, yearsToMerge,RunLumi);
 	return MHTCorr_Unc
 def WriteSignalSystematics(signaldirtag,signal,mGo,mLSP,yearsToMerge,RunLumi,searchRegion):
@@ -180,9 +180,6 @@ if __name__ == '__main__':
 	mGo=int(options.mGo)
 	inputsigtag=options.signal
 	TestNominal=NominalSignal(signaldirtag,inputsigtag,mGo,mLSP,yearsToMerge,RunLumi)
-	parse=sms.split('_')
-	model=parse[0]
-	#print parse
 	signaltag="RA2bin_"+sms;
 	#AR-180427:Here signaltag becomes "RA2bin_T1tttt_1500_100_fast
 	if options.fastsim:signaltag+"_fast";
