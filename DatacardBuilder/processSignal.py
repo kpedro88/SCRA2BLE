@@ -33,42 +33,45 @@ def MergeStatErr(signaldirtag,sms,MergedNominal):
 	SigTempFile.Close();
 	return MCStatErr
 
-def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi,MergedNominal):
-	systs = dict(
-		MCStatErr=MergeStatErr(signaldirtag,sms,MergedNominal),
-		#Symmetric Norm Uncertainties
-		LumiUnc=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"lumiuncUp",MergedNominal,True),
-		JetIDUnc=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"jetiduncUp",MergedNominal,True),
-		IsoTrackUnc=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"isotrackuncUp",MergedNominal,True),
-		PrefireUncUp=MergeUncPreFireCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"prefireuncUp",MergedNominal,True),
-		PrefireUncDown=MergeUncPreFireCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"prefireuncDown",MergedNominal,False),
-		ISRUncUp=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"isruncUp",MergedNominal,True),
-		ISRUncDown=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"isruncDown",MergedNominal,False),
-		TrigUnc=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"triguncUp",MergedNominal),
-		TrigSysUnc=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"trigsystuncUp",MergedNominal),
-		PUUncUp=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"puuncUp",MergedNominal,True),
-		PUUncDown=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"puuncDown",MergedNominal,False),
-		JERUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JERup",MergedNominal),
-		JECUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JECup",MergedNominal),
-		BTagSFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"btagSFuncUp",MergedNominal),
-		MisTagSFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"mistagSFuncUp",MergedNominal),
-		CTagCFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"ctagCFuncUp",MergedNominal),
-		BTagCFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"btagCFuncUp",MergedNominal),
-		MisTagCFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"mistagCFuncUp",MergedNominal),
-		JERUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JERdown",MergedNominal),
-		JECUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JECdown",MergedNominal),
-		BTagSFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"btagSFuncDown",MergedNominal),
-		MisTagSFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"mistagSFuncDown",MergedNominal),
-		BTagCFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"btagCFuncDown",MergedNominal),
-		CTagCFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"ctagCFuncDown",MergedNominal),
-		MisTagCFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"mistagCFuncDown",MergedNominal),
-	)
+def MergeSignalSystematic(oname,name,func,*args):
+	oname = oname.replace(".root","_{}.root".format(name))
+	ofile = TFile.Open(oname,"RECREATE")
+	hist = func(*args)
+	ofile.cd()
+	hist.Write(name)
+	ofile.Close()
+
+def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi,MergedNominal,oname):
+	MergeSignalSystematic(oname,"MCStatErr",MergeStatErr,signaldirtag,sms,MergedNominal)
+	MergeSignalSystematic(oname,"LumiUnc",MergeUncCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"lumiuncUp",MergedNominal,True)
+	MergeSignalSystematic(oname,"JetIDUnc",MergeUncCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"jetiduncUp",MergedNominal,True)
+	MergeSignalSystematic(oname,"IsoTrackUnc",MergeUncCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"isotrackuncUp",MergedNominal,True)
+	MergeSignalSystematic(oname,"PrefireUncUp",MergeUncPreFireCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"prefireuncUp",MergedNominal,True)
+	MergeSignalSystematic(oname,"PrefireUncDown",MergeUncPreFireCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"prefireuncDown",MergedNominal,False)
+	MergeSignalSystematic(oname,"ISRUncUp",MergeUncCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"isruncUp",MergedNominal,True)
+	MergeSignalSystematic(oname,"ISRUncDown",MergeUncCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"isruncDown",MergedNominal,False)
+	MergeSignalSystematic(oname,"TrigUnc",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"triguncUp",MergedNominal)
+	MergeSignalSystematic(oname,"TrigSysUnc",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"trigsystuncUp",MergedNominal)
+	MergeSignalSystematic(oname,"PUUncUp",MergeUncCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"puuncUp",MergedNominal,True)
+	MergeSignalSystematic(oname,"PUUncDown",MergeUncCorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"puuncDown",MergedNominal,False)
+	MergeSignalSystematic(oname,"JERUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"JERup",MergedNominal)
+	MergeSignalSystematic(oname,"JECUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"JECup",MergedNominal)
+	MergeSignalSystematic(oname,"BTagSFUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"btagSFuncUp",MergedNominal)
+	MergeSignalSystematic(oname,"MisTagSFUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"mistagSFuncUp",MergedNominal)
+	MergeSignalSystematic(oname,"CTagCFUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"ctagCFuncUp",MergedNominal)
+	MergeSignalSystematic(oname,"BTagCFUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"btagCFuncUp",MergedNominal)
+	MergeSignalSystematic(oname,"MisTagCFUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"mistagCFuncUp",MergedNominal)
+	MergeSignalSystematic(oname,"JERUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"JERdown",MergedNominal)
+	MergeSignalSystematic(oname,"JECUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"JECdown",MergedNominal)
+	MergeSignalSystematic(oname,"BTagSFUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"btagSFuncDown",MergedNominal)
+	MergeSignalSystematic(oname,"MisTagSFUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"mistagSFuncDown",MergedNominal)
+	MergeSignalSystematic(oname,"BTagCFUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"btagCFuncDown",MergedNominal)
+	MergeSignalSystematic(oname,"CTagCFUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"ctagCFuncDown",MergedNominal)
+	MergeSignalSystematic(oname,"MisTagCFUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"mistagCFuncDown",MergedNominal)
+
 	if "pMSSM" not in sms:
-		systs.update(dict(
-			ScaleUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncUp",MergedNominal),
-			ScaleUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncDown",MergedNominal),
-		))
-	return systs
+		MergeSignalSystematic(oname,"ScaleUncUp",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncUp",MergedNominal)
+		MergeSignalSystematic(oname,"ScaleUncDown",MergeUncUncorrelated,signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncDown",MergedNominal)
 
 if __name__ == '__main__':
 	options = get_options()
@@ -78,16 +81,19 @@ if __name__ == '__main__':
 
 	MergedNominal, MergedFinal = NominalSignal(options.sigDir,options.sms,yearsToMerge,RunLumi)
 
-	systs = MergeSignalSystematics(options.sigDir,options.sms,yearsToMerge,RunLumi,MergedNominal)
-
 	ofilename = "RA2bin_merge_%s_fast.root" %(options.sms)
-	ofile = TFile.Open(ofilename,"RECREATE")
+
+	MergeSignalSystematics(options.sigDir,options.sms,yearsToMerge,RunLumi,MergedNominal,ofilename)
+
+	ofile = TFile.Open(ofilename.replace(".root","_Nominal.root"),"RECREATE")
 	ofile.cd()
 	for h in MergedFinal:
 		h.Write()
-	for k,v in systs.iteritems():
-		v.Write(k)
 	ofile.Close()
+
+	# hadd
+	os.system("hadd {0} {1} && rm {1}".format(ofilename, ofilename.replace(".root","_*.root")))
+
 	if options.transfer:
 		os.system("xrdcp -f {0} {1}/{0}".format(ofilename,options.sigDir))
 		os.remove(ofilename)
