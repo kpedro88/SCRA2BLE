@@ -28,10 +28,12 @@ def loopTHN(hist,fn):
 	if hist.InheritsFrom(THnSparse.Class()):
 		iter = THnIter(hist)
 		b = long(0)
+		idx = [0]*hist.GetNdimensions()
+		idx = array('i',idx)
 		while True:
-			b = iter.Next()
-			if b>0:
-				fn(b,iter.GetCoord(2))
+			b = iter.Next(idx)
+			if b>=0:
+				fn(idx,idx[-1])
 			else:
 				break
 	else:
