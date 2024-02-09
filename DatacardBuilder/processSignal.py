@@ -39,6 +39,7 @@ def MergeSignalSystematic(oname,name,func,*args):
 	hist = func(*args)
 	ofile.cd()
 	hist.Write(name)
+	hist.Delete()
 	ofile.Close()
 
 def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi,MergedNominal,oname):
