@@ -8,15 +8,17 @@ from SignalMergePeriods import *
 from common import *
 
 def NominalSignal(signaldirtag,sms,yearsToMerge,RunLumi):
+	print("NominalSignal")
 	MergedFullRun2=MergeSignal(signaldirtag,sms,yearsToMerge,RunLumi);
 	MergedFullRun2.SetName("RA2bin_%s%s_nominalOrig" %(sms,getHistoSuffix(sms)))
 	MHTCorr_Unc=[]
 	if "T1tttt" in sms or "T2tt" in sms or "T5qqqqVV" in sms or "pMSSM" in sms:
 		MHTCorr_Unc=SubtractSignalContamination(signaldirtag,sms,yearsToMerge,RunLumi)
 	else:MHTCorr_Unc=MHTSystematicGenMHT(signaldirtag,sms, yearsToMerge,RunLumi);
-	return MHTCorr_Unc
+	return MergedFullRun2, MHTCorr_Unc
 
 def MergeStatErr(signaldirtag,sms,MergedNominal):
+	print("MergeStatErr")
 	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2018_fast.root" %(sms))
 	MCStatErr=SigTempFile.Get("%s_%s_MC2018%s_MCStatErr" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)));
 	SetDirectory0(MCStatErr)
@@ -31,8 +33,7 @@ def MergeStatErr(signaldirtag,sms,MergedNominal):
 	SigTempFile.Close();
 	return MCStatErr
 
-def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi):
-	MergedNominal=MergeSignal(signaldirtag,sms,yearsToMerge,RunLumi);
+def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi,MergedNominal):
 	systs = dict(
 		MCStatErr=MergeStatErr(signaldirtag,sms,MergedNominal),
 		#Symmetric Norm Uncertainties
@@ -44,7 +45,7 @@ def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi):
 		ISRUncUp=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"isruncUp",MergedNominal,True),
 		ISRUncDown=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"isruncDown",MergedNominal,False),
 		TrigUnc=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"triguncUp",MergedNominal),
-		TrigSysUnc=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"trigsystuncUp;",MergedNominal),
+		TrigSysUnc=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"trigsystuncUp",MergedNominal),
 		PUUncUp=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"puuncUp",MergedNominal,True),
 		PUUncDown=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"puuncDown",MergedNominal,False),
 		JERUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JERup",MergedNominal),
@@ -75,14 +76,14 @@ if __name__ == '__main__':
 	# --------------------------------------------
 	# signal
 
-	TestNominal=NominalSignal(options.sigDir,options.sms,yearsToMerge,RunLumi)
+	MergedNominal, MergedFinal = NominalSignal(options.sigDir,options.sms,yearsToMerge,RunLumi)
 
-	systs = MergeSignalSystematics(options.sigDir,options.sms,yearsToMerge,RunLumi)
+	systs = MergeSignalSystematics(options.sigDir,options.sms,yearsToMerge,RunLumi,MergedNominal)
 
 	ofilename = "RA2bin_merge_%s_fast.root" %(options.sms)
 	ofile = TFile.Open(ofilename,"RECREATE")
 	ofile.cd()
-	for h in TestNominal:
+	for h in MergedFinal:
 		h.Write()
 	for k,v in systs.iteritems():
 		v.Write(k)
