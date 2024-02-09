@@ -9,7 +9,7 @@ from common import *
 
 def NominalSignal(signaldirtag,sms,yearsToMerge,RunLumi):
 	MergedFullRun2=MergeSignal(signaldirtag,sms,yearsToMerge,RunLumi);
-	MergedFullRun2.SetName("RA2bin_%s_fast_nominalOrig" %(sms))
+	MergedFullRun2.SetName("RA2bin_%s%s_nominalOrig" %(sms,getHistoSuffix(sms)))
 	MHTCorr_Unc=[]
 	if "T1tttt" in sms or "T2tt" in sms or "T5qqqqVV" in sms or "pMSSM" in sms:
 		MHTCorr_Unc=SubtractSignalContamination(signaldirtag,sms,yearsToMerge,RunLumi)
@@ -17,16 +17,17 @@ def NominalSignal(signaldirtag,sms,yearsToMerge,RunLumi):
 	return MHTCorr_Unc
 
 def MergeStatErr(signaldirtag,sms,MergedNominal):
-	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2016_fast.root" %(sms))
-	MCStatErr=SigTempFile.Get("RA2bin_%s_MC2016_fast_MCStatErr" %sms);
-	MCStatErr.SetDirectory(0)
+	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2018_fast.root" %(sms))
+	MCStatErr=SigTempFile.Get("%s_%s_MC2018%s_MCStatErr" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)));
+	SetDirectory0(MCStatErr)
 	MCStatErr.Reset();
-	for i in range(1, MergedNominal.GetNbinsX()+1):
-		StatErr=MergedNominal.GetBinError(i);
-		if StatErr<=0 or MergedNominal.GetBinContent(i)<=0:StatErr=1.0;
+	def _fn(bN,b1):
+		StatErr=MergedNominal.GetBinError(bN);
+		if StatErr<=0 or MergedNominal.GetBinContent(bN)<=0: StatErr=1.0;
 		else:
-			StatErr=1.0+(StatErr/MergedNominal.GetBinContent(i))
-		MCStatErr.SetBinContent(i, StatErr);
+			StatErr=1.0+(StatErr/MergedNominal.GetBinContent(bN))
+		MCStatErr.SetBinContent(bN, StatErr);
+	loopTHN(MergedNominal,_fn)
 	SigTempFile.Close();
 	return MCStatErr
 
@@ -46,7 +47,6 @@ def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi):
 		TrigSysUnc=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"trigsystuncUp;",MergedNominal),
 		PUUncUp=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"puuncUp",MergedNominal,True),
 		PUUncDown=MergeUncCorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"puuncDown",MergedNominal,False),
-		ScaleUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncUp",MergedNominal),
 		JERUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JERup",MergedNominal),
 		JECUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JECup",MergedNominal),
 		BTagSFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"btagSFuncUp",MergedNominal),
@@ -54,7 +54,6 @@ def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi):
 		CTagCFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"ctagCFuncUp",MergedNominal),
 		BTagCFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"btagCFuncUp",MergedNominal),
 		MisTagCFUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"mistagCFuncUp",MergedNominal),
-		ScaleUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncDown",MergedNominal),
 		JERUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JERdown",MergedNominal),
 		JECUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"JECdown",MergedNominal),
 		BTagSFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"btagSFuncDown",MergedNominal),
@@ -63,6 +62,11 @@ def MergeSignalSystematics(signaldirtag,sms,yearsToMerge,RunLumi):
 		CTagCFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"ctagCFuncDown",MergedNominal),
 		MisTagCFUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"mistagCFuncDown",MergedNominal),
 	)
+	if "pMSSM" not in sms:
+		systs.update(dict(
+			ScaleUncUp=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncUp",MergedNominal),
+			ScaleUncDown=MergeUncUncorrelated(signaldirtag,sms,yearsToMerge,RunLumi,"scaleuncDown",MergedNominal),
+		))
 	return systs
 
 if __name__ == '__main__':
