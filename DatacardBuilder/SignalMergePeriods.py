@@ -44,12 +44,12 @@ def SubtractSignalContamination(signaldirtag,sms, yearsToCombine, lumiscales):
 	print("SubtractSignalContamination")
 	LLPlusHadTauAvg_file=TFile.Open("inputHistograms/histograms_137.4fb/InputsForLimits_data_formatted_LLPlusHadTau.root");
 	LLPlusHadTauPrediction_AVGTF=LLPlusHadTauAvg_file.Get("LLPlusHadTauTF")
-	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2018_fast.root" %(sms))
-	NominalCorrSignal=SigTempFile.Get("%s_%s_MC2018%s_nominalOrig" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)))
-	NominalCorrSignalUnc=SigTempFile.Get("%s_%s_MC2018%s_MHTSyst" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)))
-	GenCorrSignal=SigTempFile.Get("%s_%s_MC2018%s_genMHT" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)))
-	SignalContaminReco=SigTempFile.Get("%s_%s_MC2018%s_SLm" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)))
-	SignalContaminGEN=SigTempFile.Get("%s_%s_MC2018%s_SLm-genMHT" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)))
+	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(sms,yearsToCombine[0]))
+	NominalCorrSignal=SigTempFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
+	NominalCorrSignalUnc=SigTempFile.Get("%s_%s_%s%s_MHTSyst" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
+	GenCorrSignal=SigTempFile.Get("%s_%s_%s%s_genMHT" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
+	SignalContaminReco=SigTempFile.Get("%s_%s_%s%s_SLm" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
+	SignalContaminGEN=SigTempFile.Get("%s_%s_%s%s_SLm-genMHT" %(getHistoPrefix(sms),yearsToCombine[0],sms,getHistoSuffix(sms)))
 	SignalContaminReco.Reset()
 	SignalContaminGEN.Reset()
 
@@ -104,10 +104,10 @@ def SubtractSignalContamination(signaldirtag,sms, yearsToCombine, lumiscales):
 
 def MHTSystematicGenMHT(signaldirtag,signaltag, yearsToCombine,lumiscales):
 	print("MHTSystematicGenMHT")
-	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2018_fast.root" %(signaltag))
-	NominalCorrSignal=SigTempFile.Get("%s_%s_MC2018%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag)))
-	NominalCorrSignalUnc=SigTempFile.Get("%s_%s_MC2018%s_MHTSyst" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag)))
-	GenCorrSignal=SigTempFile.Get("%s_%s_MC2018%s_genMHT" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag)))
+	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[0]))
+	NominalCorrSignal=SigTempFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[0],getHistoSuffix(signaltag)))
+	NominalCorrSignalUnc=SigTempFile.Get("%s_%s_%s%s_MHTSyst" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[0],getHistoSuffix(signaltag)))
+	GenCorrSignal=SigTempFile.Get("%s_%s_%s%s_genMHT" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[0],getHistoSuffix(signaltag)))
 	GenCorrSignal.Reset();
 	NominalCorrSignal.Reset()
 	NominalCorrSignalUnc.Reset();
@@ -142,15 +142,6 @@ def MHTSystematicGenMHT(signaldirtag,signaltag, yearsToCombine,lumiscales):
 
 
 def MergeSignal(signaldirtag,signaltag, yearsToCombine, lumiscales):
-	global MergedSignal
-	SigTempFileName=signaldirtag+"/RA2bin_proc_%s_MC2018_fast.root" %(signaltag)
-	print(SigTempFileName)
-	SigTempFile=TFile.Open(SigTempFileName)
-	print("%s_%s_MC2018%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag)))
-	MergedSignal=SigTempFile.Get("%s_%s_MC2018%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag)))
-	MergedSignal.Reset();
-	SetDirectory0(MergedSignal)
-	SigTempFile.Close();
 	for i in range(len(yearsToCombine)):
 		SignalRunFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[i]))
 		SignalRun=SignalRunFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag)));
@@ -169,7 +160,11 @@ def MergeSignal(signaldirtag,signaltag, yearsToCombine, lumiscales):
 			loopTHN(SignalRunHEM,_fn)
 
 		if "MC2018HEM" in yearsToCombine[i]:continue
-		MergedSignal.Add(SignalRun);
+		if i==0:
+			MergedSignal = SignalRun
+			SetDirectory0(MergedSignal)
+		else:
+			MergedSignal.Add(SignalRun);
 		SignalRunFile.Close();
 
 	MergedSignal.SetName("RA2bin_%s%s_nominalOrig" %(signaltag,getHistoSuffix(signaltag)))
@@ -177,9 +172,8 @@ def MergeSignal(signaldirtag,signaltag, yearsToCombine, lumiscales):
 
 def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2):
 	print(Unc)
-	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2018_fast.root" %(signaltag))
-	MergedUnc=SigTempFile.Get("%s_%s_MC2018%s_%s" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag),Unc))
-	MergedUnc.Reset();
+	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[0]))
+	MergedUnc=SigTempFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[0],getHistoSuffix(signaltag),Unc))
 	SetDirectory0(MergedUnc)
 	SigTempFile.Close();
 	for i in range(len(yearsToCombine)):
@@ -187,26 +181,28 @@ def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,
 		SignalRun=SignalRunFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag)));
 		SignalRunUnc=SignalRunFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag),Unc));
 		SignalRun.Scale(lumiscales[i])
-		sign={}
 		def _fn(bN,b1):
-			UncQuadSum=MergedUnc.GetBinContent(bN)+pow((SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN))),2);
-			if SignalRunUnc.GetBinContent(bN)>=1.0: sign[bN] = 1.0
-			else: sign[bN] = -1.0
-			MergedUnc.SetBinContent(bN, UncQuadSum);
+			UncQuadSum=(abs(MergedUnc.GetBinContent(bN)) if i>0 else 0)+pow((SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN))),2);
+			if SignalRunUnc.GetBinContent(bN)>=1.0: sign = 1.0
+			else: sign = -1.0
+			MergedUnc.SetBinContent(bN, sign*UncQuadSum);
 		loopTHN(MergedUnc,_fn)
 		SignalRunFile.Close();
 	def _fn(bN,b1):
-		if MergedUnc.GetBinContent(bN)>0:
-			MergedUnc.SetBinContent(bN,1.0+sign[bN]*(sqrt(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN)));
+		MergedUncContent = MergedUnc.GetBinContent(bN)
+		if MergedUncContent>=1.0: sign = 1.0
+		else: sign = -1.0
+		MergedUncContent = abs(MergedUncContent)
+		if MergedUncContent>0:
+			MergedUnc.SetBinContent(bN,1.0+sign*(sqrt(MergedUncContent)/MergedFullRun2.GetBinContent(bN)));
 		else: MergedUnc.SetBinContent(bN,1.0);
 	loopTHN(MergedUnc,_fn)
 	return MergedUnc;
 
 def MergeUncCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2,isUp):
 	print(Unc)
-	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2018_fast.root" %(signaltag))
-	MergedUnc=SigTempFile.Get("%s_%s_MC2018%s_%s" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag),Unc))
-	MergedUnc.Reset();
+	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[0]))
+	MergedUnc=SigTempFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[0],getHistoSuffix(signaltag),Unc))
 	SetDirectory0(MergedUnc)
 	SigTempFile.Close();
 	for i in range(len(yearsToCombine)):
@@ -215,7 +211,7 @@ def MergeUncCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,Me
 		SignalRunUnc=SignalRunFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag),Unc));
 		SignalRun.Scale(lumiscales[i])
 		def _fn(bN,b1):
-			UncQuadSum=MergedUnc.GetBinContent(bN)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
+			UncQuadSum=(MergedUnc.GetBinContent(bN) if i>0 else 0)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
 			MergedUnc.SetBinContent(bN, UncQuadSum);
 		loopTHN(MergedUnc,_fn)
 		SignalRunFile.Close();
@@ -229,9 +225,8 @@ def MergeUncCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,Me
 
 def MergeUncPreFireCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2,isUp):
 	print(Unc)
-	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_MC2017_fast.root" %(signaltag))
-	MergedUnc=SigTempFile.Get("%s_%s_MC2017%s_%s" %(getHistoPrefix(signaltag),signaltag,getHistoSuffix(signaltag),Unc))
-	MergedUnc.Reset();
+	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[0]))
+	MergedUnc=SigTempFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[0],getHistoSuffix(signaltag),Unc))
 	SetDirectory0(MergedUnc)
 	SigTempFile.Close();
 	for i in range(len(yearsToCombine)):
@@ -241,7 +236,7 @@ def MergeUncPreFireCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales
 		SignalRunUnc=SignalRunFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag),Unc));
 		SignalRun.Scale(lumiscales[i])
 		def _fn(bN,b1):
-			UncQuadSum=MergedUnc.GetBinContent(bN)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
+			UncQuadSum=(MergedUnc.GetBinContent(bN) if i>0 else 0)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
 			MergedUnc.SetBinContent(bN, UncQuadSum);
 		loopTHN(MergedUnc,_fn)
 		SignalRunFile.Close();
