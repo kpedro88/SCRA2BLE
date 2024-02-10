@@ -49,7 +49,7 @@ def SubtractSignalContamination(signaldirtag,sms, yearsToCombine, lumiscales):
 	NominalCorrSignalUnc=SigTempFile.Get("%s_%s_%s%s_MHTSyst" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
 	GenCorrSignal=SigTempFile.Get("%s_%s_%s%s_genMHT" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
 	SignalContaminReco=SigTempFile.Get("%s_%s_%s%s_SLm" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
-	SignalContaminGEN=SigTempFile.Get("%s_%s_%s%s_SLm-genMHT" %(getHistoPrefix(sms),yearsToCombine[0],sms,getHistoSuffix(sms)))
+	SignalContaminGEN=SigTempFile.Get("%s_%s_%s%s_SLm-genMHT" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
 	SignalContaminReco.Reset()
 	SignalContaminGEN.Reset()
 

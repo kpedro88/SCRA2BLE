@@ -12,6 +12,7 @@ def get_options():
 	parser.add_argument('--realData',action='store_true', dest='realData', default=False, help='use real data')
 	parser.add_argument('--sigDir',dest="sigDir", default="root://cmseos.fnal.gov//store/user/pedrok/SUSY2015/Analysis/Datacards/Run2ProductionV17_v1/", type=str, help='input signal histogram directory', metavar="sigDir")
 	parser.add_argument('--transfer',action='store_true', dest='transfer', default=False, help='transfer output back to input dir')
+	parser.add_argument("--operation", type=int, default=None, help="operation to perform")
 	options = parser.parse_args()
 
 	# postprocessing
@@ -26,4 +27,5 @@ def get_options():
 
 #yearsToMerge=["MC2016","MC2017","MC2018", "MC2018HEM"]
 yearsToMerge=["MC2017","MC2018", "MC2018HEM"]
-RunLumi=[ 35916.403 , 41521.425,21000.905,38196.951 ]
+#RunLumi=[ 35916.403 , 41521.425,21000.905,38196.951 ]
+RunLumi=[ 41521.425,21000.905,38196.951 ]
