@@ -52,10 +52,20 @@ if __name__ == '__main__':
 	options = get_options()
 
 	oname = "RA2bin_merge_%s_fast.root" %(options.sms)
+
+	oname2 = oname.replace(".root","_{}.root".format("Merged"))
 	if options.operation is None:
 		MergedNominal = None
 	else:
-		MergedNominal = MergeNominal(options.sigDir,options.sms,yearsToMerge,RunLumi)
+		if os.path.isfile(oname2):
+			mfile = TFile.Open(oname2)
+			MergedNominal = mfile.Get("MergedNominal")
+		else:
+			MergedNominal = MergeNominal(options.sigDir,options.sms,yearsToMerge,RunLumi)
+			mfile = TFile.Open(oname2,"RECREATE")
+			mfile.cd()
+			MergedNominal.Write("MergedNominal")
+			mfile.Close()
 
 	operations = [
 		["Nominal",NominalSignal,options.sigDir,options.sms,yearsToMerge,RunLumi],
@@ -100,8 +110,12 @@ if __name__ == '__main__':
 			print(cmd)
 			os.system(cmd)
 
+		# remove tmp file
+		if os.path.isfile(oname2):
+			os.system("rm {}".format(oname2))
+
 		# hadd
-		os.system("hadd {0} {1} && rm {1}".format(oname, oname.replace(".root","_*.root")))
+		os.system("hadd -f {0} {1} && rm {1}".format(oname, oname.replace(".root","_*.root")))
 
 		if options.transfer:
 			os.system("xrdcp -f {0} {1}/{0}".format(oname,options.sigDir))
