@@ -87,12 +87,32 @@ def SubtractSignalContamination(signaldirtag,sms, yearsToCombine, lumiscales):
 		SignalContaminGEN.Add(SignalContaminGenEle);
 		SignalRunFile.Close();
 
+	# original algorithm:
+	# UnCorrSignal = NominalCorrSignal - SignalContaminReco*LLPlusHadTauPrediction_AVGTF
+	# GenMHTCleaned = GenCorrSignal - SignalContaminGEN*LLPlusHadTauPrediction_AVGTF
+	# NominalCorrSignal = (UnCorrSignal+GenMHTCleaned)/2.
+	# NominalCorrSignalUnc = 1.0+(abs(UnCorrSignal-GenMHTCleaned)/2.)/NominalCorrSignal
+
 	def _fn(bN,b1):
-		UnCorrSignal=NominalCorrSignal.GetBinContent(bN)-(SignalContaminReco.GetBinContent(bN)*LLPlusHadTauPrediction_AVGTF.GetBinContent(b1))
-		GenMHTCleaned=GenCorrSignal.GetBinContent(bN)-(SignalContaminGEN.GetBinContent(bN)*LLPlusHadTauPrediction_AVGTF.GetBinContent(b1))
-		NominalCorrSignal.SetBinContent(bN, (UnCorrSignal+GenMHTCleaned)/2.)
+		SignalContaminReco.SetBinContent(bN, SignalContaminReco.GetBinContent(bN)*LLPlusHadTauPrediction_AVGTF.GetBinContent(b1))
+	loopTHN(SignalContaminReco,_fn)
+
+	def _fn(bN,b1):
+		SignalContaminGEN.SetBinContent(bN, SignalContaminGEN.GetBinContent(bN)*LLPlusHadTauPrediction_AVGTF.GetBinContent(b1))
+	loopTHN(SignalContaminGEN,_fn)
+
+	NominalCorrSignal.Add(SignalContaminReco, -1)
+	GenCorrSignal.Add(SignalContaminGEN, -1)
+	# change basis: a,b -> c = (a+b)/2, d = (a-b)/2 = c-b
+	NominalCorrSignal.Add(GenCorrSignal)
+	NominalCorrSignal.Scale(0.5)
+	GenCorrSignal.Add(NominalCorrSignal,-1)
+	GenCorrSignal.Scale(-1)
+
+	# only use loops for histograms w/ same bins
+	def _fn(bN,b1):
 		if NominalCorrSignal.GetBinContent(bN)>0:
-			NominalCorrSignalUnc.SetBinContent(bN, 1.0+(abs(UnCorrSignal-GenMHTCleaned)/2.)/NominalCorrSignal.GetBinContent(bN))
+			NominalCorrSignalUnc.SetBinContent(bN, 1.0+abs(GenCorrSignal.GetBinContent(bN))/NominalCorrSignal.GetBinContent(bN))
 		else:
 			NominalCorrSignalUnc.SetBinContent(bN,1.0)
 	loopTHN(NominalCorrSignal,_fn)
@@ -126,17 +146,20 @@ def MHTSystematicGenMHT(signaldirtag,signaltag, yearsToCombine,lumiscales):
 		NominalCorrSignal.Add(SignalRun)
 		SignalRunFile.Close();
 
+	NominalCorrSignal.Add(GenCorrSignal)
+	NominalCorrSignal.Scale(0.5)
+	GenCorrSignal.Add(NominalCorrSignal,-1)
+	GenCorrSignal.Scale(-1)
+
 	def _fn(bN,b1):
-		UnCorrSignal=NominalCorrSignal.GetBinContent(bN)
-		NominalCorrSignal.SetBinContent(bN, (UnCorrSignal+GenCorrSignal.GetBinContent(bN))/2.)
 		if NominalCorrSignal.GetBinContent(bN)>0:
-			NominalCorrSignalUnc.SetBinContent(bN, 1.0+(abs(UnCorrSignal-GenCorrSignal.GetBinContent(bN))/2.)/NominalCorrSignal.GetBinContent(bN))
+			NominalCorrSignalUnc.SetBinContent(bN, 1.0+abs(GenCorrSignal.GetBinContent(bN))/NominalCorrSignal.GetBinContent(bN))
 		else:
 			NominalCorrSignalUnc.SetBinContent(bN, 1.0)
 	loopTHN(NominalCorrSignal,_fn)
+
 	MHTCorr=[]
 	MHTCorr.append(NominalCorrSignal)
-
 	MHTCorr.append(NominalCorrSignalUnc)
 	return MHTCorr
 
@@ -181,13 +204,36 @@ def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,
 		SignalRun=SignalRunFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag)));
 		SignalRunUnc=SignalRunFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag),Unc));
 		SignalRun.Scale(lumiscales[i])
+
+		# original algorithm:
+		# MergedUnc.Reset()
+		# UncQuadSum = abs(MergedUnc) + pow(SignalRun*abs(1-SignalRunUnc), 2)
+		# if SignalRunUnc>=1.0: sign = 1.0
+		# else: sign = -1.0
+		# MergedUnc.SetBinContent(sign*UncQuadSum)
+
+		SignalRunUncTmp = SignalRunUnc.Clone(SignalRunUnc.GetName()+"Tmp")
 		def _fn(bN,b1):
-			UncQuadSum=(abs(MergedUnc.GetBinContent(bN)) if i>0 else 0)+pow((SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN))),2);
-			if SignalRunUnc.GetBinContent(bN)>=1.0: sign = 1.0
-			else: sign = -1.0
-			MergedUnc.SetBinContent(bN, sign*UncQuadSum);
-		loopTHN(MergedUnc,_fn)
+			SignalRunUncTmp.SetBinContent(bN, abs(1-SignalRunUnc.GetBinContent(bN)))
+		loopTHN(SignalRunUncTmp,_fn)
+		SignalRun.Multiply(SignalRunUncTmp)
+		SignalRun.Multiply(SignalRun)
+
+		if i==0:
+			MergedUnc = SignalRun
+		else:
+			MergedUnc.Add(SignalRun)
+
+		# check sign only for last year (original algorithm overwrote sign from previous years)
+		if i==len(yearsToCombine)-1:
+			def _fn(bN,b1):
+				if SignalRunUnc.GetBinContent(bN)>=1.0: sign = 1.0
+				else: sign = -1.0
+				MergedUnc.SetBinContent(bN, sign*MergedUnc.GetBinContent(bN));
+			loopTHN(MergedUnc,_fn)
+
 		SignalRunFile.Close();
+
 	def _fn(bN,b1):
 		MergedUncContent = MergedUnc.GetBinContent(bN)
 		if MergedUncContent>=1.0: sign = 1.0
@@ -197,6 +243,7 @@ def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,
 			MergedUnc.SetBinContent(bN,1.0+sign*(sqrt(MergedUncContent)/MergedFullRun2.GetBinContent(bN)));
 		else: MergedUnc.SetBinContent(bN,1.0);
 	loopTHN(MergedUnc,_fn)
+
 	return MergedUnc;
 
 def MergeUncCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2,isUp):
@@ -206,44 +253,36 @@ def MergeUncCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,Me
 	SetDirectory0(MergedUnc)
 	SigTempFile.Close();
 	for i in range(len(yearsToCombine)):
-		SignalRunFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[i]))
-		SignalRun=SignalRunFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag)));
-		SignalRunUnc=SignalRunFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag),Unc));
-		SignalRun.Scale(lumiscales[i])
-		def _fn(bN,b1):
-			UncQuadSum=(MergedUnc.GetBinContent(bN) if i>0 else 0)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
-			MergedUnc.SetBinContent(bN, UncQuadSum);
-		loopTHN(MergedUnc,_fn)
-		SignalRunFile.Close();
-	def _fn(bN,b1):
-		if MergedFullRun2.GetBinContent(bN)>0:
-			if isUp: MergedUnc.SetBinContent(bN, 1.0+(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
-			else:MergedUnc.SetBinContent(bN, 1.0-(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
-		else: MergedUnc.SetBinContent(bN,1.0);
-	loopTHN(MergedUnc,_fn)
-	return MergedUnc;
+		# no prefire unc in 2018
+		if "prefire" in Unc.lower() and "2018" in yearsToCombine[i]: continue
 
-def MergeUncPreFireCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,MergedFullRun2,isUp):
-	print(Unc)
-	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[0]))
-	MergedUnc=SigTempFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[0],getHistoSuffix(signaltag),Unc))
-	SetDirectory0(MergedUnc)
-	SigTempFile.Close();
-	for i in range(len(yearsToCombine)):
-		if "2018" in yearsToCombine[i]:continue #NO Prefire unc
 		SignalRunFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(signaltag,yearsToCombine[i]))
 		SignalRun=SignalRunFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag)));
 		SignalRunUnc=SignalRunFile.Get("%s_%s_%s%s_%s" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i],getHistoSuffix(signaltag),Unc));
 		SignalRun.Scale(lumiscales[i])
+
+		# original algorithm:
+		# MergedUnc.Reset()
+		# UncQuadSum = MergedUnc + SignalRun*abs(1-SignalRunUnc)
+		# MergedUnc.SetBinContent(UncQuadSum)
+
 		def _fn(bN,b1):
-			UncQuadSum=(MergedUnc.GetBinContent(bN) if i>0 else 0)+(SignalRun.GetBinContent(bN)*abs(1-SignalRunUnc.GetBinContent(bN)));
-			MergedUnc.SetBinContent(bN, UncQuadSum);
-		loopTHN(MergedUnc,_fn)
+			SignalRunUnc.SetBinContent(bN, abs(1-SignalRunUnc.GetBinContent(bN)))
+		loopTHN(SignalRunUnc,_fn)
+		SignalRun.Multiply(SignalRunUnc)
+
+		if i==0:
+			MergedUnc = SignalRun
+		else:
+			MergedUnc.Add(SignalRun)
+
 		SignalRunFile.Close();
+
 	def _fn(bN,b1):
 		if MergedFullRun2.GetBinContent(bN)>0:
 			if isUp: MergedUnc.SetBinContent(bN, 1.0+(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
 			else:MergedUnc.SetBinContent(bN, 1.0-(MergedUnc.GetBinContent(bN))/MergedFullRun2.GetBinContent(bN));
 		else: MergedUnc.SetBinContent(bN,1.0);
 	loopTHN(MergedUnc,_fn)
+
 	return MergedUnc;
