@@ -2,8 +2,6 @@ import ROOT
 ROOT.PyConfig.IgnoreCommandLineOptions = True
 from ROOT import *
 import os
-from singleBin import *
-from cardUtilities import *
 from SignalMergePeriods import *
 from common import *
 
@@ -13,7 +11,7 @@ def MergeNominal(sigDir,sms,yearsToMerge,RunLumi):
 	return MergedFullRun2
 
 def NominalSignal(sigDir,sms,yearsToMerge,RunLumi):
-	print("NominalSignal")
+	fprint("NominalSignal")
 	MHTCorr_Unc=[]
 	if "T1tttt" in sms or "T2tt" in sms or "T5qqqqVV" in sms or "pMSSM" in sms:
 		MHTCorr_Unc=SubtractSignalContamination(sigDir,sms,yearsToMerge,RunLumi)
@@ -21,7 +19,7 @@ def NominalSignal(sigDir,sms,yearsToMerge,RunLumi):
 	return MHTCorr_Unc
 
 def MergeStatErr(sigDir,sms,MergedNominal):
-	print("MergeStatErr")
+	fprint("MergeStatErr")
 	SigTempFile=TFile.Open(sigDir+"/RA2bin_proc_%s_MC2018_fast.root" %(sms))
 	MCStatErr=SigTempFile.Get("%s_%s_MC2018%s_MCStatErr" %(getHistoPrefix(sms),sms,getHistoSuffix(sms)));
 	SetDirectory0(MCStatErr)
@@ -107,7 +105,7 @@ if __name__ == '__main__':
 		# run each operation as separate subprocess to restrict memory usage
 		for i in range(len(operations)):
 			cmd = "python {} --operation {}".format(" ".join(sys.argv), i)
-			print(cmd)
+			fprint(cmd)
 			os.system(cmd)
 
 		# remove tmp file
