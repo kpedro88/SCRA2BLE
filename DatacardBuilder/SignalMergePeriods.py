@@ -217,14 +217,14 @@ def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,
 		def _fn(bN,b1):
 			SignalRunUncTmp.SetBinContent(bN, abs(1-SignalRunUnc.GetBinContent(bN)))
 		loopTHN(SignalRunUncTmp,_fn)
-		SignalRun.Multiply(SignalRunUncTmp)
-		SignalRun.Multiply(SignalRun)
+		SignalRunUncTmp.Multiply(SignalRun)
+		SignalRunUncTmp.Multiply(SignalRunUncTmp)
 
 		if i==0:
-			MergedUnc = SignalRun
+			MergedUnc = SignalRunUncTmp
 			SetDirectory0(MergedUnc)
 		else:
-			MergedUnc.Add(SignalRun)
+			MergedUnc.Add(SignalRunUncTmp)
 
 		# check sign only for last year (original algorithm overwrote sign from previous years)
 		if i==len(yearsToCombine)-1:
@@ -271,13 +271,13 @@ def MergeUncCorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,Me
 		def _fn(bN,b1):
 			SignalRunUnc.SetBinContent(bN, abs(1-SignalRunUnc.GetBinContent(bN)))
 		loopTHN(SignalRunUnc,_fn)
-		SignalRun.Multiply(SignalRunUnc)
+		SignalRunUnc.Multiply(SignalRun)
 
 		if i==0:
-			MergedUnc = SignalRun
+			MergedUnc = SignalRunUnc
 			SetDirectory0(MergedUnc)
 		else:
-			MergedUnc.Add(SignalRun)
+			MergedUnc.Add(SignalRunUnc)
 
 		SignalRunFile.Close();
 
