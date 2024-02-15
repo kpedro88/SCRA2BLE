@@ -35,13 +35,14 @@ def MergeStatErr(sigDir,sms,MergedNominal):
 	return MCStatErr
 
 def WriteSingleHist(oname,name,func,*args):
-	oname = oname.replace(".root","_{}.root".format(name))
+	suff = '_'.join(name) if isinstance(name,list) else name
+	oname = oname.replace(".root","_{}.root".format(suff))
 	ofile = TFile.Open(oname,"RECREATE")
 	hist = func(*args)
 	ofile.cd()
 	if isinstance(hist,list):
-		for h in hist:
-			h.Write()
+		for h,n in zip(hist,name):
+			h.Write(n)
 	else:
 		hist.Write(name)
 	ofile.Close()
@@ -66,7 +67,7 @@ if __name__ == '__main__':
 			mfile.Close()
 
 	operations = [
-		["Nominal",NominalSignal,options.sigDir,options.sms,yearsToMerge,RunLumi],
+		[["nominalOrig","MHTSyst"],NominalSignal,options.sigDir,options.sms,yearsToMerge,RunLumi],
 		["MCStatErr",MergeStatErr,options.sigDir,options.sms,MergedNominal],
 		["LumiUnc",MergeUncCorrelated,options.sigDir,options.sms,yearsToMerge,RunLumi,"lumiuncUp",MergedNominal,True],
 		["JetIDUnc",MergeUncCorrelated,options.sigDir,options.sms,yearsToMerge,RunLumi,"jetiduncUp",MergedNominal,True],
@@ -97,8 +98,8 @@ if __name__ == '__main__':
 
 	if "pMSSM" not in options.sms:
 		operations.extend([
-			[oname,"ScaleUncUp",MergeUncUncorrelated,options.sigDir,options.sms,yearsToMerge,RunLumi,"scaleuncUp",MergedNominal],
-			[oname,"ScaleUncDown",MergeUncUncorrelated,options.sigDir,options.sms,yearsToMerge,RunLumi,"scaleuncDown",MergedNominal],
+			["ScaleUncUp",MergeUncUncorrelated,options.sigDir,options.sms,yearsToMerge,RunLumi,"scaleuncUp",MergedNominal],
+			["ScaleUncDown",MergeUncUncorrelated,options.sigDir,options.sms,yearsToMerge,RunLumi,"scaleuncDown",MergedNominal],
 		])
 
 	if options.operation is None:

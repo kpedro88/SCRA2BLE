@@ -25,7 +25,8 @@ def get_options(single=False):
 	options = parser.parse_args()
 
 	# postprocessing
-	if options.set is not None:
+	options.smsIn = None
+	if hasattr(options,'set') and options.set is not None:
 		options.sms = options.signal+'_'+options.set
 	else:
 		if hasattr(options,'params') and options.params is not None:
@@ -36,6 +37,8 @@ def get_options(single=False):
 		options.sms = "{}_{}_{}".format(options.signal,options.mGo,options.mLSP)
 		if hasattr(options,'params') and options.params is not None:
 			options.smsIn = options.sms
+	if options.smsIn is None:
+		options.smsIn = options.sms
 
 	return options
 

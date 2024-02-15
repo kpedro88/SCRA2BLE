@@ -4,7 +4,9 @@ from ROOT import *
 import os
 from singleBin import *
 from cardUtilities import *
+from searchRegion import *
 from common import *
+from SignalMergePeriods import SetDirectory0
 
 def ProjectTHN(hist, id1, id2):
 	dims = hist.GetDimension()
@@ -22,25 +24,25 @@ def ProjectTHN(hist, id1, id2):
 	hproj = hist.Projection(2,"E")
 	return hproj
 
-def WriteSignalSystematics(SigHists):
+def WriteSignalSystematics(SigHists,signalRegion):
 	#Symmetric Norm Uncertainties
 	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["MCStatErr"])
-	searchRegion.addSystematicsLine('lnN',['sig'],SigHists["LumiUnc"])
-	searchRegion.addSystematicsLine('lnN',['sig'],SigHists["JetIDUnc"])
-	searchRegion.addSystematicsLine('lnN',['sig'],SigHists["IsoTrackUnc"])
-	searchRegion.addSystematicsLine('lnN',['sig'],SigHists["TrigUnc"])
-	searchRegion.addSystematicsLine('lnN',['sig'],SigHists["TrigSysUnc"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["PUUncUp"],SigHists["PUUncDown"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["MisTagCFUncDown"],SigHists["MisTagCFUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["BTagCFUncDown"],SigHists["BTagCFUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["CTagCFUncDown"],SigHists["CTagCFUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["MisTagSFUncDown"],SigHists["MisTagSFUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["BTagSFUncDown"],SigHists["BTagSFUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["JERUncDown"],SigHists["JERUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["JECUncDown"],SigHists["JECUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["ScaleUncDown"],SigHists["ScaleUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["ISRUncDown"],SigHists["ISRUncUp"])
-	searchRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["PrefireUncDown"],SigHists["PrefireUncUp"])
+	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["LumiUnc"])
+	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["JetIDUnc"])
+	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["IsoTrackUnc"])
+	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["TrigUnc"])
+	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["TrigSysUnc"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["PUUncUp"],SigHists["PUUncDown"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["MisTagCFUncDown"],SigHists["MisTagCFUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["BTagCFUncDown"],SigHists["BTagCFUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["CTagCFUncDown"],SigHists["CTagCFUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["MisTagSFUncDown"],SigHists["MisTagSFUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["BTagSFUncDown"],SigHists["BTagSFUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["JERUncDown"],SigHists["JERUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["JECUncDown"],SigHists["JECUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["ScaleUncDown"],SigHists["ScaleUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["ISRUncDown"],SigHists["ISRUncUp"])
+	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["PrefireUncDown"],SigHists["PrefireUncUp"])
 
 def WriteZSystematics(inputfile,CSSystematics,SymSystematics,AsymSystematics,signalRegion):
 	Z_file=TFile.Open(inputfile)
@@ -97,6 +99,7 @@ if __name__ == '__main__':
 			SigHists[key] = ProjectTHN(htmp, options.mGo, options.mLSP)
 		else:
 			SigHists[key] = htmp
+		SetDirectory0(SigHists[key])
 	SigTempFile.Close()
 
 	odir = 'testCards-Moriond-%s-%1.1f/' % ( options.sms, options.lumi );
@@ -118,7 +121,7 @@ if __name__ == '__main__':
 		contributionsPerBin.append(tmpcontributions) #AR: contributionsPerBin has saved seven elements' list per bin
 	signalRegion = searchRegion('signal', contributionsPerBin, tagsForSignalRegion)
 	if options.realData:
-		DataHist_In=TFile.Open("inputHistograms/histograms_%1.1ffb/RA2bin_signalUnblindMerged.root" %lumi)
+		DataHist_In=TFile.Open("inputHistograms/histograms_%1.1ffb/RA2bin_signalUnblindMerged.root" %options.lumi)
 		Data_Hist=DataHist_In.Get("RA2bin_data_Unblind")
 		Data_Hist.SetDirectory(0);
 		Data_List=binsToList(Data_Hist) # creates a list of bin content
@@ -202,13 +205,13 @@ if __name__ == '__main__':
 	ZSystematicsASym=["hzvvNbCorrelUp","hzvvNbCorrelLow","hzvvDYMCerrLow","hzvvDYMCerrUp"]
 	WriteZSystematics(idir+"ZinvHistos.root",ZSystematicsCS,ZSystematicsSym,ZSystematicsASym,signalRegion)
 	#Signal Systematics
-	signaltag = "RA2bin_proc_"+sms+"_Merged";
+	signaltag = "RA2bin_proc_"+options.sms+"_Merged";
 	signaltag+="_fast"
-	signaltag="RA2bin_"+sms+"_fast";
+	signaltag="RA2bin_"+options.sms+"_fast";
 	#MHTSyst=TestNominal[1]#signal_inputfile.Get(signaltag+"_MHTSyst")
 	signalRegion.addSystematicsLine('lnU',['sig'],SigHists["MHTSyst"]);
 	#AR-180516:Gets various systematics histograms associated to signal nominal yield histogram "RA2bin_T1tttt_1500_100_fast_nominal"
-	WriteSignalSystematics(SigHists)
+	WriteSignalSystematics(SigHists,signalRegion)
 
 	######################################################################
 	######################################################################
