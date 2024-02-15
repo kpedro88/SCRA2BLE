@@ -123,10 +123,11 @@ class searchRegion:
 			self._singleBins[i].writeRates();
 
 	def writeCards(self, odir):
+		onames = []
 		for i in range(self._nBins):
-		# for i in range(4,18):
-			# if i!=3 and i!=2: self._singleBins[i].writeCard( odir );
-			self._singleBins[i].writeCard( odir );
+			oname = self._singleBins[i].writeCard( odir );
+			onames.append(oname)
+		return onames
 
 	def GetNbins(self):
 		return self._nBins;

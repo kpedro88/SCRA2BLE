@@ -219,5 +219,15 @@ if __name__ == '__main__':
 	######################################################################
 	######################################################################
 
-	print odir
-	signalRegion.writeCards( odir );
+	print(odir)
+	cards = signalRegion.writeCards( odir );
+
+	command = ["combineCards.py"]+cards+["> "+odir+"/allcards.txt"]
+	command = ' '.join(command)
+	print(command)
+	os.system(command)
+
+	# disable for now because slow
+#	combine_cmd = "text2workspace.py --X-allow-no-signal --X-allow-no-background {0}/allcards.txt -o {0}/allcards.root".format(odir)
+#	print(combine_cmd)
+#	os.system(combine_cmd)

@@ -197,7 +197,9 @@ class singleBin:
 
 	def writeCard( self, odir ):
 
-		ofile = open(odir+'/card_'+self._name+'.txt','w');
+		oname = odir+'/card_'+self._name+'.txt'
+		ofile = open(oname,'w');
 		for line in self._allLines: ofile.write(line);
 		#ofile.write("* autoMCStats 0 ")
 		ofile.close();
+		return oname
