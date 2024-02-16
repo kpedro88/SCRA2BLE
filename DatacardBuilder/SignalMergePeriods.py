@@ -177,11 +177,10 @@ def MergeSignal(signaldirtag,signaltag, yearsToCombine, lumiscales):
 			SignalRunHEM=SignalRunFileHEM.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(signaltag),signaltag,yearsToCombine[i+1],getHistoSuffix(signaltag)))
 			SignalRunHEM.Scale(lumiscales[i+1])
 			SignalRunHEM.SetName("%s_%s" %(signaltag,yearsToCombine[i+1]))
-			SignalRunHEMOrig = SignalRunHEM.Clone("HEMOrig")
-			SignalRunHEM.Add(MergedCorrelated)
+			SignalRun.Add(SignalRunHEM)
 			def _fn(bN,b1):
-				SignalRunHEM.SetBinError(bN, MergedCorrelated.GetBinError(bN)+SignalRunHEMOrig.GetBinError(bN))
-			loopTHN(SignalRunHEM,_fn)
+				SignalRun.SetBinError(bN, MergedCorrelated.GetBinError(bN)+SignalRunHEM.GetBinError(bN))
+			loopTHN(SignalRun,_fn)
 
 		if "MC2018HEM" in yearsToCombine[i]:continue
 		if i==0:
@@ -238,7 +237,7 @@ def MergeUncUncorrelated(signaldirtag,signaltag, yearsToCombine, lumiscales,Unc,
 
 	def _fn(bN,b1):
 		MergedUncContent = MergedUnc.GetBinContent(bN)
-		if MergedUncContent>=1.0: sign = 1.0
+		if MergedUncContent>=0.0: sign = 1.0
 		else: sign = -1.0
 		MergedUncContent = abs(MergedUncContent)
 		if MergedUncContent>0:
