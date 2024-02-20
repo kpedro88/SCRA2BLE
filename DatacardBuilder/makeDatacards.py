@@ -85,6 +85,10 @@ if __name__ == '__main__':
 		else:
 			SigHists[key] = htmp
 		SetDirectory0(SigHists[key])
+		# fix for missing bin labels
+		if len(SigHists[key].GetXaxis().GetBinLabel(1))==0:
+			for b in range(SigHists[key].GetNbinsX()):
+				SigHists[key].GetXaxis().SetBinLabel(b+1,"signal_"+key)
 	SigTempFile.Close()
 
 	odir = 'testCards-Moriond-%s-%1.1f/' % ( options.sms, options.lumi );
