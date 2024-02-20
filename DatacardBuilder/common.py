@@ -35,8 +35,6 @@ def get_options(single=False):
 		options.mGo = int(options.masses[0])
 		options.mLSP = int(options.masses[1])
 		options.sms = "{}_{}_{}".format(options.signal,options.mGo,options.mLSP)
-		if hasattr(options,'params') and options.params is not None:
-			options.smsIn = options.sms
 	if options.smsIn is None:
 		options.smsIn = options.sms
 
