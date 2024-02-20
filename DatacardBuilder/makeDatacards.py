@@ -8,23 +8,7 @@ from searchRegion import *
 from common import *
 from SignalMergePeriods import SetDirectory0
 
-def ProjectTHN(hist, id1, id2):
-	dims = hist.GetDimension()
-	npmssm = 2
-	pdims = dims - npmssm
-	if pdims != 1:
-		raise ValueError("Requested projection to {} dims".format(pdims))
-
-	bin1 = hist.GetAxis(0).FindBin(id1)
-	bin2 = hist.GetAxis(1).FindBin(id2)
-
-	hist.GetAxis(0).SetRange(bin1,bin1)
-	hist.GetAxis(1).SetRange(bin2,bin2)
-
-	hproj = hist.Projection(2,"E")
-	return hproj
-
-def WriteSignalSystematics(SigHists,signalRegion):
+def WriteSignalSystematics(sms,SigHists,signalRegion):
 	#Symmetric Norm Uncertainties
 	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["MCStatErr"])
 	signalRegion.addSystematicsLine('lnN',['sig'],SigHists["LumiUnc"])
@@ -40,9 +24,10 @@ def WriteSignalSystematics(SigHists,signalRegion):
 	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["BTagSFUncDown"],SigHists["BTagSFUncUp"])
 	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["JERUncDown"],SigHists["JERUncUp"])
 	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["JECUncDown"],SigHists["JECUncUp"])
-	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["ScaleUncDown"],SigHists["ScaleUncUp"])
 	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["ISRUncDown"],SigHists["ISRUncUp"])
 	signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["PrefireUncDown"],SigHists["PrefireUncUp"])
+	if "pMSSM" not in sms:
+		signalRegion.addSystematicsLineAsymShape('lnN',['sig'],SigHists["ScaleUncDown"],SigHists["ScaleUncUp"])
 
 def WriteZSystematics(inputfile,CSSystematics,SymSystematics,AsymSystematics,signalRegion):
 	Z_file=TFile.Open(inputfile)
@@ -211,7 +196,7 @@ if __name__ == '__main__':
 	#MHTSyst=TestNominal[1]#signal_inputfile.Get(signaltag+"_MHTSyst")
 	signalRegion.addSystematicsLine('lnU',['sig'],SigHists["MHTSyst"]);
 	#AR-180516:Gets various systematics histograms associated to signal nominal yield histogram "RA2bin_T1tttt_1500_100_fast_nominal"
-	WriteSignalSystematics(SigHists,signalRegion)
+	WriteSignalSystematics(options.sms,SigHists,signalRegion)
 
 	######################################################################
 	######################################################################

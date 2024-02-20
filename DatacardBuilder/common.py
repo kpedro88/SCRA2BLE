@@ -14,7 +14,7 @@ def get_options(single=False):
 	parser_model = parser.add_mutually_exclusive_group()
 	parser_model.add_argument("--masses", dest="masses", default=None, type=int, nargs=2, help="Mass of Gluino, mass of LSP", metavar=("mGo","mLSP"))
 	if single:
-		parser_model.add_argument("--params", dest="params", default=None, type=int, nargs=3, help="pMSSM params", metavar=("set","id1","id2"))
+		parser_model.add_argument("--params", dest="params", default=None, type=str, nargs=3, help="pMSSM params", metavar=("set","id1","id2"))
 	else:
 		parser_model.add_argument("--set", dest="set", default=None, type=str, help="pMSSM set name", metavar="set")
 	parser.add_argument('--realData',action='store_true', dest='realData', default=False, help='use real data')
@@ -32,8 +32,8 @@ def get_options(single=False):
 		if hasattr(options,'params') and options.params is not None:
 			options.masses = options.params[1:]
 			options.smsIn = options.signal+'_'+options.params[0]
-		options.mGo = options.masses[0]
-		options.mLSP = options.masses[1]
+		options.mGo = int(options.masses[0])
+		options.mLSP = int(options.masses[1])
 		options.sms = "{}_{}_{}".format(options.signal,options.mGo,options.mLSP)
 		if hasattr(options,'params') and options.params is not None:
 			options.smsIn = options.sms
@@ -46,3 +46,19 @@ def get_options(single=False):
 yearsToMerge=["MC2017","MC2018", "MC2018HEM"]
 #RunLumi=[ 35916.403 , 41521.425,21000.905,38196.951 ]
 RunLumi=[ 41521.425,21000.905,38196.951 ]
+
+def ProjectTHN(hist, id1, id2):
+	dims = hist.GetNdimensions()
+	npmssm = 2
+	pdims = dims - npmssm
+	if pdims != 1:
+		raise ValueError("Requested projection to {} dims".format(pdims))
+
+	bin1 = hist.GetAxis(0).FindBin(id1)
+	bin2 = hist.GetAxis(1).FindBin(id2)
+
+	hist.GetAxis(0).SetRange(bin1,bin1)
+	hist.GetAxis(1).SetRange(bin2,bin2)
+
+	hproj = hist.Projection(2,"E")
+	return hproj
