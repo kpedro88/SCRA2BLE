@@ -46,6 +46,9 @@ yearsToMerge=["MC2017","MC2018", "MC2018HEM"]
 RunLumi=[ 41521.425,21000.905,38196.951 ]
 
 def ProjectTHN(hist, id1, id2):
+	id1 = int(id1)
+	id2 = int(id2)
+
 	dims = hist.GetNdimensions()
 	npmssm = 2
 	pdims = dims - npmssm
