@@ -8,6 +8,8 @@ if __name__=="__main__":
 	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument("--params", dest="params", default=None, type=str, nargs=3, help="pMSSM params", metavar=("set","id1","id2"))
 	parser.add_argument('--sigDir',dest="sigDir", default="root://cmseos.fnal.gov//store/user/lpcpmssm/Datacards/Run2ProductionV17_v1", type=str, help='input signal histogram directory', metavar="sigDir")
+	parser.add_argument('--pref',dest="pref", default="proc", type=str, help='prefix for filename RA2b_[prefix]_...')
+	parser.add_argument('--suff',dest="suff", default="fast", type=str, help='suffix for filename ..._MC201X_[suffix].root')
 	options = parser.parse_args()
 
 	options.signal = "pMSSM"
@@ -15,8 +17,10 @@ if __name__=="__main__":
 	options.sms = "{}_{}_{}".format(options.signal,options.params[1],options.params[2])
 
 	for year in yearsToMerge:
-		SigTempFile=TFile.Open(options.sigDir+"/RA2bin_proc_%s_%s_fast.root" %(options.smsIn,year))
-		SigOutFile=TFile.Open("RA2bin_proc_%s_%s_fast.root"%(options.sms,year),"RECREATE")
+		SigTempName=options.sigDir+"/RA2bin_%s_%s_%s_%s.root" %(options.pref,options.smsIn,year,options.suff)
+		print(SigTempName)
+		SigTempFile=TFile.Open(SigTempName)
+		SigOutFile=TFile.Open("RA2bin_%s_%s_%s_%s.root"%(options.pref,options.sms,year,options.suff),"RECREATE")
 		for key in [k.GetName() for k in SigTempFile.GetListOfKeys()]:
 			htmp = SigTempFile.Get(key)
 			# project pMSSM model
