@@ -36,6 +36,25 @@ git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester
 git clone -b Run2LegacyPub  https://github.com/rpatelCERN/SCRA2BLE.git
 ```
 
+## pMSSM instructions
+
+The code is somewhat reorganized to handle the THnSparse format used to organize pMSSM signals.
+
+The default approach is to run over an entire group of signals at once, resulting in a single output file that can be used to produce datacards for any signal in the group:
+```bash
+python processSignal.py --signal pMSSM --lumi 137.4 --set set1prompt1 --sigDir root://cmseos.fnal.gov//store/user/lpcpmssm/Datacards/Run2ProductionV17_v1
+python makeDatacards.py --signal pMSSM --lumi 137.4 --params set1prompt1 355 11107 --sigDir . --realData
+```
+
+To validate this approach, a given signal model can first be projected out and then processed:
+```bash
+python makeProjection.py --params set1prompt1 355 11107
+python processSignal.py --signal pMSSM --lumi 137.4 --masses 355 11107 --sigDir .
+python makeDatacards.py --signal pMSSM --lumi 137.4 --masses 355 11107 --sigDir . --realData
+```
+
+These two approaches should produce the same output, modulo minor floating point differences.
+
 ## Building DataCards for the Combine Tool
 
 The python scripts in DatacardBuilder are designed to take the input bkg estimate histograms as well as an input SMS fastSIM signal point and create datacards for the combine tool.
