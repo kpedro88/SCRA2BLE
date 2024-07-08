@@ -40,10 +40,8 @@ def get_options(single=False):
 
 	return options
 
-#yearsToMerge=["MC2016","MC2017","MC2018", "MC2018HEM"]
-yearsToMerge=["MC2017","MC2018", "MC2018HEM"]
-#RunLumi=[ 35916.403 , 41521.425,21000.905,38196.951 ]
-RunLumi=[ 41521.425,21000.905,38196.951 ]
+yearsToMerge=["MC2016","MC2017","MC2018", "MC2018HEM"]
+RunLumi=[ 35916.403 , 41521.425,21000.905,38196.951 ]
 
 def ProjectTHN(hist, id1, id2):
 	id1 = int(id1)
