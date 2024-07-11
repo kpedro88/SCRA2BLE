@@ -91,7 +91,7 @@ def makeDatacards(options):
 
 	odir = 'testCards-Moriond-%s-%1.1f/' % ( options.sms, options.lumi );
 	#AR-180426: idir=inputHistograms/histograms_137fb/. Here are various background estimates.
-	idir = 'inputHistograms/histograms_%1.1ffb/' % ( options.lumi );
+	idir = 'root://cmseos.fnal.gov//store/user/lpcpmssm/inputHistograms/histograms_%1.1ffb/' % ( options.lumi );
 	if os.path.exists(odir): os.system( "rm -rf %s" % (odir) );
 	os.makedirs(odir);
 

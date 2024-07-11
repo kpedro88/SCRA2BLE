@@ -43,7 +43,7 @@ def loopTHN(hist,fn):
 
 def SubtractSignalContamination(signaldirtag,sms, yearsToCombine, lumiscales):
 	fprint("SubtractSignalContamination")
-	LLPlusHadTauAvg_file=TFile.Open("inputHistograms/histograms_137.4fb/InputsForLimits_data_formatted_LLPlusHadTau.root");
+	LLPlusHadTauAvg_file=TFile.Open("root://cmseos.fnal.gov//store/user/lpcpmssm/inputHistograms/histograms_137.4fb/InputsForLimits_data_formatted_LLPlusHadTau.root");
 	LLPlusHadTauPrediction_AVGTF=LLPlusHadTauAvg_file.Get("LLPlusHadTauTF")
 	SigTempFile=TFile.Open(signaldirtag+"/RA2bin_proc_%s_%s_fast.root" %(sms,yearsToCombine[0]))
 	NominalCorrSignal=SigTempFile.Get("%s_%s_%s%s_nominalOrig" %(getHistoPrefix(sms),sms,yearsToCombine[0],getHistoSuffix(sms)))
