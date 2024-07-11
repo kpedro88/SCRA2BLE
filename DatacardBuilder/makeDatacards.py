@@ -72,9 +72,7 @@ def WriteLostLeptonSystematics(inputfile, ListOfSystematics,signalRegion):
 
 	LLPlusHadTauAvg_file.Close()
 
-if __name__ == '__main__':
-	options = get_options(single=True)
-
+def makeDatacards(options):
 	SigTempFile=TFile.Open(options.sigDir+"/RA2bin_merge_%s_fast.root" %(options.smsIn))
 	SigHists = {}
 	for key in [k.GetName() for k in SigTempFile.GetListOfKeys()]:
@@ -220,3 +218,7 @@ if __name__ == '__main__':
 #	combine_cmd = "text2workspace.py --X-allow-no-signal --X-allow-no-background {0}/allcards.txt -o {0}/allcards.root".format(odir)
 #	print(combine_cmd)
 #	os.system(combine_cmd)
+
+if __name__ == '__main__':
+	options = get_options(single=True)
+	makeDatacards(options)
