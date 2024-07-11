@@ -5,7 +5,7 @@ def fprint(msg):
     print(msg)
     sys.stdout.flush()
 
-def get_options(single=False):
+def get_options(single=False,jobs=False):
 	parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 	#AR-180426: When parse_args() returns from parsing this command line,options.signal will be "SMSqqqq1000", options.fastsim will be "false" in default case
 	#AR-180426:sample command to run this script, coming from analysisBuilderCondor.py will be: python analysisBuilderCondor.py --signal T1tttt --mGo 1500 --mLSP 100 --fastsim --realData  --tag allBkgs
@@ -22,6 +22,9 @@ def get_options(single=False):
 	if not single:
 		parser.add_argument('--transfer',action='store_true', dest='transfer', default=False, help='transfer output back to input dir')
 		parser.add_argument("--operation", type=int, default=None, help="operation to perform")
+	if jobs:
+		parser.add_argument('--split', type=int, default=None, required=True, help='number of models per job for splitting')
+		parser.add_argument('--dryrun', action='store_true', help='print info w/o submitting jobs')
 	options = parser.parse_args()
 
 	# postprocessing

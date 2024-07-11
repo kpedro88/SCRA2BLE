@@ -19,7 +19,7 @@ Include the Higgs combine tool code and compile:
 git -b 81x-root606 clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 cd HiggsAnalysis/CombinedLimit
 git fetch origin
-git checkout v7.0.9
+git checkout v7.0.11
 scramv1 b clean; scramv1 b  
 ```
 
@@ -54,6 +54,11 @@ python makeDatacards.py --signal pMSSM --lumi 137.4 --masses 355 11107 --sigDir 
 ```
 
 These two approaches should produce the same output, modulo minor floating point differences.
+
+Once a datacard is created, the next step is to run Combine, get the likelihood, and extract Z-scores and Bayes factors:
+```bash
+python runCombine.py --signal pMSSM --lumi 137.4 --params set1prompt1 355 11107
+```
 
 ## Building DataCards for the Combine Tool
 
