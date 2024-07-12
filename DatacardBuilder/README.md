@@ -60,6 +60,17 @@ Once a datacard is created, the next step is to run Combine, get the likelihood,
 python runCombine.py --signal pMSSM --lumi 137.4 --params set1prompt1 355 11107
 ```
 
+These two steps (making datacards and running Combine) can be done at once (choosing a different model point by changing the value of `--firstJob`):
+```bash
+python runJob.py --signal pMSSM --lumi 137.4 --realData --sigDir root://cmseos.fnal.gov//store/user/lpcpmssm/Datacards/Run2ProductionV17_v1 --params set1prompt1 -1 -1 --firstJob 0 --split 1
+```
+
+To submit Condor jobs for the entire set of signal models:
+```bash
+(cd batch; ./RCcheck.sh)
+python submitCombine.py --signal pMSSM --set set1prompt1 --split 200
+```
+
 ## Building DataCards for the Combine Tool
 
 The python scripts in DatacardBuilder are designed to take the input bkg estimate histograms as well as an input SMS fastSIM signal point and create datacards for the combine tool.

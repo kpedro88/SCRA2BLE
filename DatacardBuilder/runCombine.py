@@ -40,12 +40,13 @@ def runCombine(options):
 	ints = ['chain_index', 'Niteration']
 	floats = ['llhd_{}_mu0p0f', 'Zsig_{}_mu0p5f', 'Zsig_{}_mu1p0f', 'Zsig_{}_mu1p5f', 'bf_{}_mu0p5f', 'bf_{}_mu1p0f', 'bf_{}_mu1p5f']
 	floats = [f.format(analysis) for f in floats]
-	gROOT.ProcessLine(
-		"struct quantile_t { "+
-		" ".join(["Int_t {};".format(qty) for qty in ints])+
-		" ".join(["Double_t {};".format(qty) for qty in floats])+
-		" };"
-	)
+	if not 'quantile_t' in globals():
+		gROOT.ProcessLine(
+			"struct quantile_t { "+
+			" ".join(["Int_t {};".format(qty) for qty in ints])+
+			" ".join(["Double_t {};".format(qty) for qty in floats])+
+			" };"
+		)
 	qobj = quantile_t()
 
 	# create output tree

@@ -211,7 +211,7 @@ def makeDatacards(options):
 
 	command = ["combineCards.py"]+cards+["> "+odir+"/allcards.txt"]
 	command = ' '.join(command)
-	print(command)
+	#print(command)
 	os.system(command)
 
 	# disable for now because slow
