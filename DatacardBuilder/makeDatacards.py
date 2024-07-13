@@ -108,13 +108,13 @@ def makeDatacards(options):
 		contributionsPerBin.append(tmpcontributions) #AR: contributionsPerBin has saved seven elements' list per bin
 	signalRegion = searchRegion('signal', contributionsPerBin, tagsForSignalRegion)
 	if options.realData:
-		DataHist_In=TFile.Open("inputHistograms/histograms_%1.1ffb/RA2bin_signalUnblindMerged.root" %options.lumi)
+		DataHist_In=TFile.Open("root://cmseos.fnal.gov//store/user/lpcpmssm/inputHistograms/histograms_%1.1ffb/RA2bin_signalUnblindMerged.root" %options.lumi)
 		Data_Hist=DataHist_In.Get("RA2bin_data_Unblind")
 		Data_Hist.SetDirectory(0);
 		Data_List=binsToList(Data_Hist) # creates a list of bin content
 		DataHist_In.Close();
 	#AR-180427: reads data prediction histograms related to LL:totalPred_LL, avgWeight_0L1L,ControlStatUnc.
-	LLPlusHadTauAvg_file=TFile.Open("inputHistograms/histograms_137.4fb/InputsForLimits_data_formatted_LLPlusHadTau.root");
+	LLPlusHadTauAvg_file=TFile.Open("root://cmseos.fnal.gov//store/user/lpcpmssm/inputHistograms/histograms_137.4fb/InputsForLimits_data_formatted_LLPlusHadTau.root");
 	LLPlusHadTauPrediction_Hist=LLPlusHadTauAvg_file.Get("totalPred_LLPlusHadTau")
 	LLPlusHadTauPrediction_Hist.SetDirectory(0)
 	LLPlusHadTauAvg_file.Close();
