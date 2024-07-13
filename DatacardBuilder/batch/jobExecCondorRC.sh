@@ -45,7 +45,7 @@ fi
 
 # copy output to eos
 echo "xrdcp output for condor"
-for FILE in results_part*.root; do
+for FILE in results_*_part*.root; do
 	echo "xrdcp -f ${FILE} ${STORE}/${FILE}"
 	stageOut -x "-f" -i ${FILE} -o ${STORE}/${FILE}
 	XRDEXIT=$?
