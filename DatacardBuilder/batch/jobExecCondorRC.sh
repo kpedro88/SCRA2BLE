@@ -12,12 +12,14 @@ echo "CMSSW on Condor"
 CMSSWVER="$1"
 STORE="$2"
 JOBNAME="$3"
+PROCESS="$4"
 
 echo ""
 echo "parameter set:"
 echo "CMSSWVER:   $CMSSWVER"
 echo "STORE:      $STORE"
 echo "JOBNAME:    $JOBNAME"
+echo "PROCESS:    $PROCESS"
 
 source stageOut.sh
 tar -xzf ${CMSSWVER}.tar.gz
@@ -29,7 +31,7 @@ eval `scramv1 runtime -sh`
 cd $_CONDOR_SCRATCH_DIR
 
 # run combine
-ARGS=$(cat macro_${JOBNAME}.txt)
+ARGS=$(cat args_${JOBNAME}_part${PROCESS}.txt)
 (set -x;
 python runJob.py --signal pMSSM --lumi 137.4 --realData $ARGS 2>&1)
 

@@ -12,13 +12,13 @@ request_disk = 1000000
 request_memory = 2000
 Should_Transfer_Files = YES
 WhenToTransferOutput = ON_EXIT
-Transfer_Input_Files = ../jobExecCondorRC.sh, {0}.tar.gz, ../stageOut.sh, input/macro_{2}_part$(Process).txt, {4}
+Transfer_Input_Files = ../jobExecCondorRC.sh, {0}.tar.gz, ../stageOut.sh, input/args_{2}_part$(Process).txt, {4}
 Output = {2}_$(Process)_$(Cluster).stdout
 Error = {2}_$(Process)_$(Cluster).stderr
 Log = {2}_$(Process)_$(Cluster).condor
 notification = Never
 x509userproxy = $ENV(X509_USER_PROXY)
-Arguments = {0} {1} {2}
+Arguments = {0} {1} {2} $(Process)
 on_exit_remove = (ExitBySignal == False) && (ExitCode == 0)
 on_exit_hold = (ExitBySignal == True) || (ExitCode != 0)
 on_exit_hold_reason = strcat("Job held by ON_EXIT_HOLD due to ",\\
