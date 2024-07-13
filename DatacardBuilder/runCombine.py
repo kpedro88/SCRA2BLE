@@ -77,5 +77,5 @@ def runCombine(options):
 	ofile.Close()
 
 if __name__=="__main__":
-	options = get_options(single=True)
+	options = get_options(single=True,allow_unknown=True)
 	runCombine(options)
