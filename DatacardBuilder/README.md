@@ -38,9 +38,9 @@ git clone -b Run2LegacyPub  https://github.com/rpatelCERN/SCRA2BLE.git
 
 ## pMSSM instructions
 
-The code is somewhat reorganized to handle the THnSparse format used to organize pMSSM signals.
+The code is somewhat reorganized to handle the THnSparse format used to organize pMSSM signals. (`script.sh` after each item indicates a script to apply the command to all sets of models.)
 
-The default approach is to run over an entire group of signals at once, resulting in a single output file that can be used to produce datacards for any signal in the group:
+The default approach is to run over an entire group of signals at once, resulting in a single output file that can be used to produce datacards for any signal in the group: (`processAll.sh`)
 ```bash
 python processSignal.py --signal pMSSM --lumi 137.4 --set set1prompt1 --sigDir root://cmseos.fnal.gov//store/user/lpcpmssm/Datacards/Run2ProductionV17_v1
 python makeDatacards.py --signal pMSSM --lumi 137.4 --params set1prompt1 355 11107 --sigDir . --realData
@@ -65,22 +65,22 @@ These two steps (making datacards and running Combine) can be done at once (choo
 python runJob.py --signal pMSSM --lumi 137.4 --realData --sigDir root://cmseos.fnal.gov//store/user/lpcpmssm/Datacards/Run2ProductionV17_v1 --params set1prompt1 -1 -1 --firstJob 0 --split 1
 ```
 
-To submit Condor jobs for the entire set of signal models:
+To submit Condor jobs for the entire set of signal models: (`submitAll.sh`)
 ```bash
 (cd batch; ./RCcheck.sh)
 python submitCombine.py --signal pMSSM --set set1prompt1 --split 200
 ```
-then `hadd` the results:
+then `hadd` the results: (`haddAll.sh`)
 ```bash
 ./batch/haddEOS.sh -i results_set1prompt1 -x root://cmseos.fnal.gov/ -d /store/user/lpcpmssm/Datacards/Run2ProductionV17_v1 -g _part -r
 ```
 
-To find any missing models from the results:
+To find any missing models from the results: (`missingAll.sh`)
 ```bash
 root -b -l -q 'findMissing.C+("set1prompt1")'
 ```
 
-To resubmit the missing models:
+To resubmit the missing models: (`resubmitAll.sh`)
 ```bash
 python submitCombine.py --signal pMSSM --set set1prompt1 --split 1 --missing missing_set1prompt1.txt
 ```
