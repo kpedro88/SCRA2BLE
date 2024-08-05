@@ -86,6 +86,7 @@ class singleBin:
 				if self._rates[i] < 0.000001 and systype == 'lnU': line += str(val*1) + " ";
 				else:
 					if(val>-99.):
+						if val<0: val = 1.0
 						line += str(val) + " ";
 					else:
 						line += " - ";

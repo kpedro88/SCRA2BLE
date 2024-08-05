@@ -6,7 +6,7 @@ from common import get_options, fprint
 
 def runPoint(id1,id2):
 	fprint("Processing model: {} {}".format(id1,id2))
-	args = ' '.join(sys.argv[:]).replace('-1',str(id1),1).replace('-1',str(id2),1)
+	args = ' '.join(sys.argv[1:]).replace('-1',str(id1),1).replace('-1',str(id2),1)
 	job_options = get_options(single=True,allow_unknown=True)
 	cmd = "python makeDatacards.py {}".format(args)
 	fprint(cmd)
