@@ -26,6 +26,7 @@ def get_options(single=False,jobs=False,allow_unknown=False):
 		parser.add_argument('--split', type=int, default=None, required=True, help='number of models per job for splitting')
 		parser.add_argument('--firstJob', type=int, default=0, help='index of first job')
 		parser.add_argument('--dryRun', action='store_true', help='print info w/o submitting jobs')
+		parser.add_argument('--missing', type=str, default='', help='file with list of missing id1 id2 pairs')
 	if allow_unknown:
 		options, _ = parser.parse_known_args()
 	else:

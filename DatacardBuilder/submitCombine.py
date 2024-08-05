@@ -47,6 +47,7 @@ if __name__=="__main__":
 	nmodels = idtree.GetEntries()
 	njobs = nmodels/options.split
 	if nmodels % options.split != 0: njobs += 1
+	if len(options.missing)>0: njobs = 1
 	firsts = [i*options.split for i in range(njobs)]
 
 	os.chdir("batch")
@@ -57,15 +58,18 @@ if __name__=="__main__":
 	for i,first in enumerate(firsts):
 		ijobname = "{}_part{}".format(jobname,i)
 		with open("{}/args_{}.txt".format(argdir,ijobname),'w') as afile:
-			afile.write(
-				"--sigDir {} --params {} -1 -1 --firstJob {} --split {}".format(
-					options.sigDir,
-					options.set,
-					first,
-					options.split,
-				)
+			argstring = "--sigDir {} --params {} -1 -1 --firstJob {} --split {}".format(
+				options.sigDir,
+				options.set,
+				first,
+				options.split,
 			)
+			if len(options.missing)>0:
+				argstring += " --missing {}".format(options.missing)
+			afile.write(argstring)
 
+	if len(options.missing)>0:
+		includes.insert(0,options.missing)
 	jdlname = "jobExecCondorRC_{}.jdl".format(options.set)
 	with open("jobs/"+jdlname,'w') as jfile:
 		jfile.write(

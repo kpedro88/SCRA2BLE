@@ -70,6 +70,21 @@ To submit Condor jobs for the entire set of signal models:
 (cd batch; ./RCcheck.sh)
 python submitCombine.py --signal pMSSM --set set1prompt1 --split 200
 ```
+then `hadd` the results:
+```bash
+./batch/haddEOS.sh -i results_set1prompt1 -x root://cmseos.fnal.gov/ -d /store/user/lpcpmssm/Datacards/Run2ProductionV17_v1 -g _part -r
+```
+
+To find any missing models from the results:
+```bash
+root -b -l -q 'findMissing.C+("set1prompt1")'
+```
+
+To resubmit the missing models:
+```bash
+python submitCombine.py --signal pMSSM --set set1prompt1 --split 1 --missing missing_set1prompt1.txt
+```
+
 
 ## Building DataCards for the Combine Tool
 
