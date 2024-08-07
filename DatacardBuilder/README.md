@@ -84,6 +84,10 @@ To resubmit the missing models: (`resubmitAll.sh`)
 ```bash
 python submitCombine.py --signal pMSSM --set set1prompt1 --split 1 --missing missing_set1prompt1.txt
 ```
+then update the `hadd`ed results: (`haddAll.sh -u`)
+```bash
+./batch/haddEOS.sh -i results_set1prompt1 -x root://cmseos.fnal.gov/ -d /store/user/lpcpmssm/Datacards/Run2ProductionV17_v1 -g _part -u -r
+```
 
 
 ## Building DataCards for the Combine Tool
